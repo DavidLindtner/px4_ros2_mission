@@ -1,1 +1,2 @@
-# px4_ros2_mission
+# NOT YET FULLY DEVELOPED
+# Simulation of Unmanned Aircrafts in a Virtual Environment
