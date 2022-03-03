@@ -2,8 +2,9 @@
 
 In order to simulate drone missions with PX4 & ROS2 you need to perform several steps:
 
-  * [Download QGroundControl](#qgroundcontrol)
+  * [Download QGroundControl](#download-qgroundcontrol)
   * [Install ROS 2 Foxy](#install-ros-2-foxy)
+  * [Download PX4 firmware](#download-px4-firmware)
   * [Install dependencies for PX4 - ROS 2 communication bridge](#px4-ros-2-bridge)
   * [Build ROS 2 workspace](#build-ros-2-workspace)
 
@@ -33,7 +34,15 @@ sudo apt install ros-foxy-eigen3-cmake-module
 sudo pip3 install -U empy pyros-genmsg setuptools
 ```
 
-## PX4 ROS 2 bridge
+## Download PX4 firmware
+
+Clone PX4 firmware repository to your home directory or somewhere else.
+
+```bash
+git clone https://github.com/PX4/PX4-Autopilot.git --recursive
+```
+
+## PX4 ROS 2 communication bridge
 
 User guide for [PX4 ROS2 bridge](https://docs.px4.io/master/en/ros/ros2_comm.html)
 

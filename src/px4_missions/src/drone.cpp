@@ -7,9 +7,12 @@ Drone::Drone(std::string vehicleName) : Node("drone")
 	_offboard_control_mode_publisher = this->create_publisher<OffboardControlMode>(vehicleName + "fmu/offboard_control_mode/in", 10);
 	_trajectory_setpoint_publisher = this->create_publisher<TrajectorySetpoint>(vehicleName + "fmu/trajectory_setpoint/in", 10);
 	_vehicle_command_publisher = this->create_publisher<VehicleCommand>(vehicleName + "fmu/vehicle_command/in", 10);
+	_timesync_sub = this->create_subscription<px4_msgs::msg::Timesync>(vehicleName + "fmu/timesync/out", 10, [this](const px4_msgs::msg::Timesync::UniquePtr msg) {_timestamp.store(msg->timestamp);});
 
-	// get common timestamp
-	_timesync_sub = this->create_subscription<px4_msgs::msg::Timesync>("vhcl0/fmu/timesync/out", 10, [this](const px4_msgs::msg::Timesync::UniquePtr msg) {_timestamp.store(msg->timestamp);});
+	//_offboard_control_mode_publisher = this->create_publisher<OffboardControlMode>("vhcl1/fmu/offboard_control_mode/in", 10);
+	//_trajectory_setpoint_publisher = this->create_publisher<TrajectorySetpoint>("vhcl1/fmu/trajectory_setpoint/in", 10);
+	//_vehicle_command_publisher = this->create_publisher<VehicleCommand>("vhcl1/fmu/vehicle_command/in", 10);
+	//_timesync_sub = this->create_subscription<px4_msgs::msg::Timesync>("vhcl1/fmu/timesync/out", 10, [this](const px4_msgs::msg::Timesync::UniquePtr msg) {_timestamp.store(msg->timestamp);});
 
 	_offboard_setpoint_counter = 0;
 

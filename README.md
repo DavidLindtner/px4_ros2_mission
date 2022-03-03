@@ -17,7 +17,7 @@ In order to simulate ROS 2 mission with PX4 firmware you need to run
   * PX4 simulation firmware with Gazebo simulator
   * ROS 2 node
 
-To run Gazebo simulator with PX4 SITL firmware you need to run this command in PX4 firmware directory.
+To run Gazebo simulator with PX4 SITL firmware you need to run this command in PX4 firmware directory downloaded previously.
 ```bash
 make px4_sitl_rtps gazebo
 ```
