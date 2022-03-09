@@ -7,12 +7,28 @@ Drone::Drone(std::string vehicleName) : Node("drone")
 	_offboard_control_mode_publisher = this->create_publisher<OffboardControlMode>(vehicleName + "fmu/offboard_control_mode/in", 10);
 	_trajectory_setpoint_publisher = this->create_publisher<TrajectorySetpoint>(vehicleName + "fmu/trajectory_setpoint/in", 10);
 	_vehicle_command_publisher = this->create_publisher<VehicleCommand>(vehicleName + "fmu/vehicle_command/in", 10);
-	_timesync_sub = this->create_subscription<px4_msgs::msg::Timesync>(vehicleName + "fmu/timesync/out", 10, [this](const px4_msgs::msg::Timesync::UniquePtr msg) {_timestamp.store(msg->timestamp);});
 
-	//_offboard_control_mode_publisher = this->create_publisher<OffboardControlMode>("vhcl1/fmu/offboard_control_mode/in", 10);
-	//_trajectory_setpoint_publisher = this->create_publisher<TrajectorySetpoint>("vhcl1/fmu/trajectory_setpoint/in", 10);
-	//_vehicle_command_publisher = this->create_publisher<VehicleCommand>("vhcl1/fmu/vehicle_command/in", 10);
-	//_timesync_sub = this->create_subscription<px4_msgs::msg::Timesync>("vhcl1/fmu/timesync/out", 10, [this](const px4_msgs::msg::Timesync::UniquePtr msg) {_timestamp.store(msg->timestamp);});
+	_vehicle_gps_sub = this->create_subscription<px4_msgs::msg::VehicleGpsPosition>(
+										vehicleName + "fmu/vehicle_gps_position/out",
+										10,
+										[this](const px4_msgs::msg::VehicleGpsPosition::ConstSharedPtr msg){
+											std::cout << "Receiving GPS signal" << std::endl;
+											std::cout << msg->lat << std::endl;
+										});
+	  
+	_timesync_sub = this->create_subscription<px4_msgs::msg::Timesync>(
+										vehicleName + "fmu/timesync/out", 
+										10, 
+										[this](const px4_msgs::msg::Timesync::UniquePtr msg) {
+											_timestamp.store(msg->timestamp);
+										});
+
+	_vehicle_odometry_sub = this->create_subscription<px4_msgs::msg::VehicleOdometry>(
+										vehicleName + "fmu/vehicle_odometry/out",
+										10,
+										[this](px4_msgs::msg::VehicleOdometry::ConstSharedPtr msg) {
+											// working fine
+										});
 
 	_offboard_setpoint_counter = 0;
 
@@ -24,16 +40,24 @@ Drone::Drone(std::string vehicleName) : Node("drone")
 
 void Drone::flight_mode_timer_callback()
 {
+	/*if (_offboard_setpoint_counter % 10 == 0)
+	{
+		std::cout << "Lat: " << _latitude.load() << std::endl;
+		std::cout << "Lon: " << _longitude.load() << std::endl;
+		std::cout << "Alt: " << _altitude.load() << std::endl;
+	}*/
 
 	if (_offboard_setpoint_counter == 25)
+	{
+		this->setFlightMode(FlightMode::mTakeOff);
+		this->arm();
+	}
+
+	if (_offboard_setpoint_counter == 190 )
 	{
 		this->setFlightMode(FlightMode::mOffboard);
 	}
 
-	if (_offboard_setpoint_counter == 50)
-	{
-		this->arm();
-	}
 
 	if (_offboard_setpoint_counter < 200)
 	{
@@ -84,7 +108,7 @@ void Drone::setFlightMode(FlightMode mode)
 			break;
 
 		case FlightMode::mTakeOff:
-			this->publish_vehicle_command(VehicleCommand::VEHICLE_CMD_NAV_TAKEOFF, 5.5, 1.5);
+			this->publish_vehicle_command(VehicleCommand::VEHICLE_CMD_NAV_TAKEOFF, 0.0, 0.0, 0.0, 0.0, 49.228754, 16.573077, 293);
 			RCLCPP_INFO(this->get_logger(), "TakeOff flight mode set");
 			break;
 			
@@ -140,13 +164,16 @@ void Drone::publish_trajectory_setpoint(float x, float y, float z, float yaw)
 	msg.x = x;
 	msg.y = y;
 	msg.z = z;
-	msg.yaw = yaw; // [-PI:PI]
-
+	msg.yaw = yaw;
+	//msg.yawspeed = yaw;
+	//msg.vx = x;
+	//msg.vy = y;
+	//msg.vz = z;
 	_trajectory_setpoint_publisher->publish(msg);
 }
 
 
-void Drone::publish_vehicle_command(uint16_t command, float param1, float param2, float param3, float param4, float param5)
+void Drone::publish_vehicle_command(uint16_t command, float param1, float param2, float param3, float param4, float param5, float param6, float param7)
 {
 	VehicleCommand msg{};
 	msg.timestamp = _timestamp.load();
@@ -155,6 +182,8 @@ void Drone::publish_vehicle_command(uint16_t command, float param1, float param2
     msg.param3 = param3;
     msg.param4 = param4;
     msg.param5 = param5;
+    msg.param6 = param6;
+    msg.param7 = param7;
 	msg.command = command;
 	msg.target_system = 1;
 	msg.target_component = 1;
