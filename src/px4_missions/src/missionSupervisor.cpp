@@ -32,9 +32,11 @@ class MissionSupervisor: public rclcpp::Node
       else
         RCLCPP_INFO(this->get_logger(), "WRONG DATA FORMAT - TERMINATING");
 
+      _absolute_time = _time_s[0];
       _publisher = this->create_publisher<missions_interfaces::msg::RelPosition>("relPosition", 10); 
       _timer = this->create_wall_timer(500ms, std::bind(&MissionSupervisor::cyclicTimer, this));
     }
+
 
 private:
 
@@ -45,11 +47,14 @@ private:
         message.y = _pos_Y[_sample_counter];
         message.z = _pos_Z[_sample_counter];
         message.yaw = _yaw_rad[_sample_counter];
-        RCLCPP_INFO(this->get_logger(), "Publishing: %f, %f, %f, %f", message.x, message.y, message.z, message.yaw);
+        //RCLCPP_INFO(this->get_logger(), "Publishing: %f, %f, %f, %f, %d, %f", message.x, message.y, message.z, message.yaw, _sample_counter, _cycle_time);
         _publisher->publish(message);
 
-      if(_cycle_time > _time_s[_sample_counter])
+      if(_cycle_time >= _absolute_time)
+      {
         _sample_counter++;
+        _absolute_time += _time_s[_sample_counter];
+      }
 
       if(_sample_counter >= _dataLength)
         rclcpp::shutdown();
@@ -64,6 +69,7 @@ private:
     std::vector<double> _time_s;
 
     double _cycle_time = 0;
+    double _absolute_time = 0;
     int _sample_counter = 0;
     int _dataLength = 0;
 

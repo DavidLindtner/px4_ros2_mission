@@ -4,3 +4,4 @@
 /src/px4_msgs
 /src/px4_ros_com
 /.vscode
+__pycache__/

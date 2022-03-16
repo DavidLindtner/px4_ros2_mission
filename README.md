@@ -33,6 +33,11 @@ To run ROS2 mission you need to source ROS 2 workspace and than run ROS 2 node.
 source ~/px4_ros2_missions/install/setup.bash
 ros2 run px4_missions simpleMission
 ```
+## Run supervised simulation
+
+```bash
+ros2 launch px4_missions supervised_launch.py
+```
 
 ## Run simulation with multiple wehicles
 

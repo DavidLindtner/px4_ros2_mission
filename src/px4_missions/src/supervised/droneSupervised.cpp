@@ -10,15 +10,19 @@ DroneSupervised::DroneSupervised(std::string vehicleName) : Drone(vehicleName)
 										_pos_Y = msg->y;
 										_pos_Z = -1*msg->z;
 										_yaw = msg->yaw;
+										_timerActive->cancel();
+										_timerActive = this->create_wall_timer(5000ms, std::bind(&DroneSupervised::timerActiveCallback, this));
 									});
 
-	_timer = this->create_wall_timer(100ms, std::bind(&DroneSupervised::flight_mode_timer_callback, this));
+	_timerActive = this->create_wall_timer(10s, std::bind(&DroneSupervised::timerActiveCallback, this));
+	_timer = this->create_wall_timer(100ms, std::bind(&DroneSupervised::timerCallback, this));
 }
 
+void DroneSupervised::timerActiveCallback() { publisherNotActive = true; }
 
-void DroneSupervised::flight_mode_timer_callback()
+void DroneSupervised::timerCallback()
 {
-	if(_offboard_setpoint_counter == 1 )
+	if(_offboard_setpoint_counter == 0)
 	{
 		this->arm();
 		this->setFlightMode(FlightMode::mOffboard);
@@ -28,7 +32,10 @@ void DroneSupervised::flight_mode_timer_callback()
 	this->publish_trajectory_setpoint(_pos_X, _pos_Y, _pos_Z, _yaw);
 
 	if(publisherNotActive)
+	{
 		this->setFlightMode(FlightMode::mLand);
+		rclcpp::shutdown();
+	}
 
 	_offboard_setpoint_counter++;
 }

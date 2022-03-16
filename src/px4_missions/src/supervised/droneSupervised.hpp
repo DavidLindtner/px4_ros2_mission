@@ -21,8 +21,11 @@ private:
 
 	rclcpp::Subscription<missions_interfaces::msg::RelPosition>::SharedPtr _rel_position_sub;
 
-	void flight_mode_timer_callback();
+	void timerCallback();
+	void timerActiveCallback();
+	
 	rclcpp::TimerBase::SharedPtr _timer;
+	rclcpp::TimerBase::SharedPtr _timerActive;
 	uint64_t _offboard_setpoint_counter;
 };
 
