@@ -11,7 +11,7 @@ DroneSupervised::DroneSupervised(std::string vehicleName) : Drone(vehicleName)
 										_pos_Z = -1*msg->z;
 										_yaw = msg->yaw;
 										_timerActive->cancel();
-										_timerActive = this->create_wall_timer(5000ms, std::bind(&DroneSupervised::timerActiveCallback, this));
+										_timerActive = this->create_wall_timer(10s, std::bind(&DroneSupervised::timerActiveCallback, this));
 									});
 
 	_timerActive = this->create_wall_timer(10s, std::bind(&DroneSupervised::timerActiveCallback, this));
