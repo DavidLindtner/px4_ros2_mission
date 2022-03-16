@@ -1,6 +1,6 @@
-#include "drone.hpp"
+#include "droneBase.hpp"
 
-Drone::Drone(std::string vehicleName) : Node("drone")
+Drone::Drone(std::string vehicleName) : Node("Drone")
 {
 	RCLCPP_INFO(this->get_logger(),  "Vehicle name: " + vehicleName);
 
@@ -12,9 +12,30 @@ Drone::Drone(std::string vehicleName) : Node("drone")
 										vehicleName + "fmu/vehicle_gps_position/out",
 										10,
 										[this](const px4_msgs::msg::VehicleGpsPosition::ConstSharedPtr msg){
+											// NOT YET WORKING
 											std::cout << "Receiving GPS signal" << std::endl;
 											std::cout << msg->lat << std::endl;
 										});
+
+	_vehicle_gps_ground_sub = this->create_subscription<px4_msgs::msg::VehicleGlobalPositionGroundtruth>(
+										vehicleName + "fmu/vehicle_global_position_groundtruth/out",
+										10,
+										[this](const px4_msgs::msg::VehicleGlobalPositionGroundtruth::ConstSharedPtr msg){
+											// NOT YET WORKING
+											std::cout << "Receiving GPS signal2" << std::endl;
+											std::cout << msg->lat << std::endl;
+										});
+
+
+	_vehicle_global_position_sub = this->create_subscription<px4_msgs::msg::VehicleGlobalPosition>(
+										vehicleName + "fmu/vehicle_global_position/out",
+										10,
+										[this](const px4_msgs::msg::VehicleGlobalPosition::ConstSharedPtr msg){
+											// NOT YET WORKING
+											std::cout << "Receiving GPS signal3" << std::endl;
+											std::cout << msg->lat << std::endl;
+										});
+
 	  
 	_timesync_sub = this->create_subscription<px4_msgs::msg::Timesync>(
 										vehicleName + "fmu/timesync/out", 
@@ -27,74 +48,14 @@ Drone::Drone(std::string vehicleName) : Node("drone")
 										vehicleName + "fmu/vehicle_odometry/out",
 										10,
 										[this](px4_msgs::msg::VehicleOdometry::ConstSharedPtr msg) {
-											// working fine
+											// WORKING OK
+											//std::cout << msg->x << std::endl;
+											//std::cout << msg->y << std::endl;
+											//std::cout << msg->z << std::endl;
 										});
 
-	_offboard_setpoint_counter = 0;
 
     //this->publish_vehicle_command(VehicleCommand::VEHICLE_CMD_DO_SET_PARAMETER, 175, 4);
-
-	_timer = this->create_wall_timer(100ms, std::bind(&Drone::flight_mode_timer_callback, this));
-}
-
-
-void Drone::flight_mode_timer_callback()
-{
-	/*if (_offboard_setpoint_counter % 10 == 0)
-	{
-		std::cout << "Lat: " << _latitude.load() << std::endl;
-		std::cout << "Lon: " << _longitude.load() << std::endl;
-		std::cout << "Alt: " << _altitude.load() << std::endl;
-	}*/
-
-	if (_offboard_setpoint_counter == 25)
-	{
-		this->setFlightMode(FlightMode::mTakeOff);
-		this->arm();
-	}
-
-	if (_offboard_setpoint_counter == 190 )
-	{
-		this->setFlightMode(FlightMode::mOffboard);
-	}
-
-
-	if (_offboard_setpoint_counter < 200)
-	{
-		this->publish_offboard_control_mode();
-		this->publish_trajectory_setpoint(0.0, 0.0, -5.0, 1.6);
-	}
-
-	if (_offboard_setpoint_counter < 300 && _offboard_setpoint_counter > 200)
-	{
-		this->publish_offboard_control_mode();
-		this->publish_trajectory_setpoint(10, 0.0, -5.0, 0);
-	}
-
-	if (_offboard_setpoint_counter < 400 && _offboard_setpoint_counter > 300) 
-	{
-		this->publish_offboard_control_mode();
-		this->publish_trajectory_setpoint(10, 10, -5.0, 1.6);
-	}
-
-	if (_offboard_setpoint_counter < 500 && _offboard_setpoint_counter > 400) 
-	{
-		this->publish_offboard_control_mode();
-		this->publish_trajectory_setpoint(0, 10, -5.0, 3.14);
-	}
-
-	if (_offboard_setpoint_counter < 600 && _offboard_setpoint_counter > 500) 
-	{
-		this->publish_offboard_control_mode();
-		this->publish_trajectory_setpoint(0, 0, -5.0, -1.6);
-	}
-
-	if (_offboard_setpoint_counter == 600)
-	{
-		this->setFlightMode(FlightMode::mLand);
-	}
-
-	_offboard_setpoint_counter++;
 }
 
 
