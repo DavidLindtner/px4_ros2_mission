@@ -14,41 +14,24 @@ void DroneSimple::flight_mode_timer_callback()
 		this->arm();
 	}
 
-	if (_offboard_setpoint_counter == 190 )
+	if (_offboard_setpoint_counter == 150 )
 	{
 		this->setFlightMode(FlightMode::mOffboard);
 	}
 
-
-	if (_offboard_setpoint_counter < 200)
+	if (_offboard_setpoint_counter < 400 )
 	{
-		this->publish_offboard_control_mode();
-		this->publish_trajectory_setpoint(0.0, 0.0, -5.0, 1.6);
+		this->publish_offboard_control_mode(OffboardControl::oVelocity);
+		this->publish_traj_setp_speed(1.5, 0.5, -0.2, 0.1);
 	}
 
-	if (_offboard_setpoint_counter < 300 && _offboard_setpoint_counter > 200)
+
+	if (_offboard_setpoint_counter > 400 )
 	{
-		this->publish_offboard_control_mode();
-		this->publish_trajectory_setpoint(10, 0.0, -5.0, 0);
+		this->publish_offboard_control_mode(OffboardControl::oRelPos);
+		this->publish_traj_setp_position(10.0, -10.0, -10.0, 0.0);
 	}
 
-	if (_offboard_setpoint_counter < 400 && _offboard_setpoint_counter > 300) 
-	{
-		this->publish_offboard_control_mode();
-		this->publish_trajectory_setpoint(10, 10, -5.0, 1.6);
-	}
-
-	if (_offboard_setpoint_counter < 500 && _offboard_setpoint_counter > 400) 
-	{
-		this->publish_offboard_control_mode();
-		this->publish_trajectory_setpoint(0, 10, -5.0, 3.14);
-	}
-
-	if (_offboard_setpoint_counter < 600 && _offboard_setpoint_counter > 500) 
-	{
-		this->publish_offboard_control_mode();
-		this->publish_trajectory_setpoint(0, 0, -5.0, -1.6);
-	}
 
 	if (_offboard_setpoint_counter == 600)
 	{

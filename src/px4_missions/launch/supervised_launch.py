@@ -8,18 +8,15 @@ def generate_launch_description():
     config = os.path.join(
         get_package_share_directory('px4_missions'),
         'params',
-        'mission1.yaml'
+        'mission2.yaml'
         )
         
     node1=Node(
         package = 'px4_missions',
-        #name = 'supervisedMission',
         executable = 'supervisedMission',
-        #parameters = [config]
     )
     node2=Node(
         package = 'px4_missions',
-        #name = 'missionSupervisor',
         executable = 'missionSupervisor',
         parameters = [config]
     )

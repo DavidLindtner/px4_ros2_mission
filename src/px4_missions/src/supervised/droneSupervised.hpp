@@ -4,6 +4,7 @@
 #include "../base/droneBase.hpp"
 
 #include <missions_interfaces/msg/rel_position.hpp>
+#include <missions_interfaces/msg/velocity.hpp>
 
 class DroneSupervised : public Drone
 {
@@ -12,20 +13,28 @@ public:
 
 private:
 
-	std::atomic<float> _pos_X;
-	std::atomic<float> _pos_Y;
-	std::atomic<float> _pos_Z;
+	std::atomic<float> _x;
+	std::atomic<float> _y;
+	std::atomic<float> _z;
 	std::atomic<float> _yaw;
 
-	bool publisherNotActive = false;
+	bool _relPosPub_Active = false;
+	bool _velPub_Active = false;
+
+	bool _resPosPub_stopped = false;
+	bool _velPub_stopped = false;
 
 	rclcpp::Subscription<missions_interfaces::msg::RelPosition>::SharedPtr _rel_position_sub;
+	rclcpp::Subscription<missions_interfaces::msg::Velocity>::SharedPtr _velocity_sub;
 
 	void timerCallback();
-	void timerActiveCallback();
+
+	void timerActiveCallback1();
+	void timerActiveCallback2();
 	
 	rclcpp::TimerBase::SharedPtr _timer;
-	rclcpp::TimerBase::SharedPtr _timerActive;
+	rclcpp::TimerBase::SharedPtr _timerActive1;
+	rclcpp::TimerBase::SharedPtr _timerActive2;
 	uint64_t _offboard_setpoint_counter;
 };
 

@@ -104,12 +104,12 @@ void Drone::disarm()
 }
 
 
-void Drone::publish_offboard_control_mode()
+void Drone::publish_offboard_control_mode(OffboardControl mode)
 {
 	OffboardControlMode msg{};
 	msg.timestamp = _timestamp.load();
-	msg.position = true;
-	msg.velocity = false;
+	msg.position = mode == OffboardControl::oRelPos;
+	msg.velocity = mode == OffboardControl::oVelocity;
 	msg.acceleration = false;
 	msg.attitude = false;
 	msg.body_rate = false;
@@ -118,7 +118,7 @@ void Drone::publish_offboard_control_mode()
 }
 
 
-void Drone::publish_trajectory_setpoint(float x, float y, float z, float yaw)
+void Drone::publish_traj_setp_position(float x, float y, float z, float yaw)
 {
 	TrajectorySetpoint msg{};
 	msg.timestamp = _timestamp.load();
@@ -126,10 +126,26 @@ void Drone::publish_trajectory_setpoint(float x, float y, float z, float yaw)
 	msg.y = y;
 	msg.z = z;
 	msg.yaw = yaw;
-	//msg.yawspeed = yaw;
-	//msg.vx = x;
-	//msg.vy = y;
-	//msg.vz = z;
+	msg.vx = std::numeric_limits<float>::quiet_NaN();
+	msg.vy = std::numeric_limits<float>::quiet_NaN();
+	msg.vz = std::numeric_limits<float>::quiet_NaN();
+	msg.yawspeed = std::numeric_limits<float>::quiet_NaN();
+	_trajectory_setpoint_publisher->publish(msg);
+}
+
+
+void Drone::publish_traj_setp_speed(float vx, float vy, float vz, float yawspeed)
+{
+	TrajectorySetpoint msg{};
+	msg.timestamp = _timestamp.load();
+	msg.x = std::numeric_limits<float>::quiet_NaN();
+	msg.y = std::numeric_limits<float>::quiet_NaN();
+	msg.z = std::numeric_limits<float>::quiet_NaN();
+	msg.yaw = std::numeric_limits<float>::quiet_NaN();
+	msg.vx = vx;
+	msg.vy = vy;
+	msg.vz = vz;
+	msg.yawspeed = yawspeed;
 	_trajectory_setpoint_publisher->publish(msg);
 }
 

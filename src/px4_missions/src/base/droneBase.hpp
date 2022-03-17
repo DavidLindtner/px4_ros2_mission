@@ -29,12 +29,16 @@ public:
 	enum class FlightMode
 	{ mOffboard, mTakeOff, mLand, mReturnToLaunch };
 
+	enum class OffboardControl
+	{ oRelPos, oAbsPos, oVelocity };
+
     void arm();
 	void disarm();
     void setFlightMode(FlightMode mode);
 
-	void publish_offboard_control_mode();
-	void publish_trajectory_setpoint(float x, float y, float z, float yaw);
+	void publish_offboard_control_mode(OffboardControl mode);
+	void publish_traj_setp_position(float x, float y, float z, float yaw);
+	void publish_traj_setp_speed(float vx, float vy, float vz, float yawspeed);
 	void publish_vehicle_command(uint16_t command, float param1 = 0.0, float param2 = 0.0, float param3 = 0.0, float param4 = 0.0, float param5 = 0.0, float param6 = 0.0, float param7 = 0.0);
 
 
