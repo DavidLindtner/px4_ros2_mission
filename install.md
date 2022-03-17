@@ -156,8 +156,9 @@ Or put it into .bashrc
 ```bash
 echo "source ~/px4_ros2_sim/px4_ros_com_ros2/install/setup.bash" >> ~/.bashrc
 ```
-To build only px4_missions package run command:
+To build other packages in workspace run command:
 ```bash
+colcon build --packages-select missions_interfaces
 colcon build --packages-select px4_missions
 ```
 
