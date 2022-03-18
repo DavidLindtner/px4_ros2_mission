@@ -39,7 +39,7 @@ ros2 run px4_missions simpleMission
 ros2 launch px4_missions supervised_launch.py
 ```
 
-## Run simulation with multiple wehicles
+## Run simulation with multiple wehicles - NOT YET DEVELOPED
 
 To start multiple wehicle simulation (multiple instances of PX4 firmware) with gazebo simulator run command in PX4-Autopilot directory:
 ```bash
