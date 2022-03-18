@@ -8,35 +8,6 @@ Drone::Drone(std::string vehicleName) : Node("Drone")
 	_trajectory_setpoint_publisher = this->create_publisher<TrajectorySetpoint>(vehicleName + "fmu/trajectory_setpoint/in", 10);
 	_vehicle_command_publisher = this->create_publisher<VehicleCommand>(vehicleName + "fmu/vehicle_command/in", 10);
 
-	_vehicle_gps_sub = this->create_subscription<px4_msgs::msg::VehicleGpsPosition>(
-										vehicleName + "fmu/vehicle_gps_position/out",
-										10,
-										[this](const px4_msgs::msg::VehicleGpsPosition::ConstSharedPtr msg){
-											// NOT YET WORKING
-											std::cout << "Receiving GPS signal" << std::endl;
-											std::cout << msg->lat << std::endl;
-										});
-
-	_vehicle_gps_ground_sub = this->create_subscription<px4_msgs::msg::VehicleGlobalPositionGroundtruth>(
-										vehicleName + "fmu/vehicle_global_position_groundtruth/out",
-										10,
-										[this](const px4_msgs::msg::VehicleGlobalPositionGroundtruth::ConstSharedPtr msg){
-											// NOT YET WORKING
-											std::cout << "Receiving GPS signal2" << std::endl;
-											std::cout << msg->lat << std::endl;
-										});
-
-
-	_vehicle_global_position_sub = this->create_subscription<px4_msgs::msg::VehicleGlobalPosition>(
-										vehicleName + "fmu/vehicle_global_position/out",
-										10,
-										[this](const px4_msgs::msg::VehicleGlobalPosition::ConstSharedPtr msg){
-											// NOT YET WORKING
-											std::cout << "Receiving GPS signal3" << std::endl;
-											std::cout << msg->lat << std::endl;
-										});
-
-	  
 	_timesync_sub = this->create_subscription<px4_msgs::msg::Timesync>(
 										vehicleName + "fmu/timesync/out", 
 										10, 
@@ -48,10 +19,15 @@ Drone::Drone(std::string vehicleName) : Node("Drone")
 										vehicleName + "fmu/vehicle_odometry/out",
 										10,
 										[this](px4_msgs::msg::VehicleOdometry::ConstSharedPtr msg) {
-											// WORKING OK
-											//std::cout << msg->x << std::endl;
-											//std::cout << msg->y << std::endl;
-											//std::cout << msg->z << std::endl;
+											odometry.x.store(msg->x);
+											odometry.y.store(msg->y);
+											odometry.z.store(msg->z);
+											odometry.vx.store(msg->vx);
+											odometry.vy.store(msg->vy);
+											odometry.vz.store(msg->vz);
+											odometry.rollspeed.store(msg->rollspeed);
+											odometry.pitchspeed.store(msg->pitchspeed);
+											odometry.yawspeed.store(msg->yawspeed);
 										});
 
 
@@ -69,7 +45,8 @@ void Drone::setFlightMode(FlightMode mode)
 			break;
 
 		case FlightMode::mTakeOff:
-			this->publish_vehicle_command(VehicleCommand::VEHICLE_CMD_NAV_TAKEOFF, 0.0, 0.0, 0.0, 0.0, 49.228754, 16.573077, 293);
+			//this->publish_vehicle_command(VehicleCommand::VEHICLE_CMD_NAV_TAKEOFF, 0.0, 0.0, 0.0, 0.0, 49.228754, 16.573077, 293);
+			this->publish_vehicle_command(VehicleCommand::VEHICLE_CMD_DO_SET_MODE, 1, 4, 2);
 			RCLCPP_INFO(this->get_logger(), "TakeOff flight mode set");
 			break;
 			
@@ -86,7 +63,6 @@ void Drone::setFlightMode(FlightMode mode)
 		default:
 			RCLCPP_INFO(this->get_logger(), "No flight mode set");
 	}
-
 }
 
 
@@ -113,7 +89,6 @@ void Drone::publish_offboard_control_mode(OffboardControl mode)
 	msg.acceleration = false;
 	msg.attitude = false;
 	msg.body_rate = false;
-
 	_offboard_control_mode_publisher->publish(msg);
 }
 

@@ -3,8 +3,7 @@
 
 #include "../base/droneBase.hpp"
 
-#include <missions_interfaces/msg/rel_position.hpp>
-#include <missions_interfaces/msg/velocity.hpp>
+#include <geometry_msgs/msg/quaternion.hpp>
 
 class DroneSupervised : public Drone
 {
@@ -24,8 +23,8 @@ private:
 	bool _resPosPub_stopped = false;
 	bool _velPub_stopped = false;
 
-	rclcpp::Subscription<missions_interfaces::msg::RelPosition>::SharedPtr _rel_position_sub;
-	rclcpp::Subscription<missions_interfaces::msg::Velocity>::SharedPtr _velocity_sub;
+	rclcpp::Subscription<geometry_msgs::msg::Quaternion>::SharedPtr _quat_pos_sub;
+	rclcpp::Subscription<geometry_msgs::msg::Quaternion>::SharedPtr _quat_vel_sub;
 
 	void timerCallback();
 

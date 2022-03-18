@@ -2,27 +2,27 @@
 
 DroneSupervised::DroneSupervised(std::string vehicleName) : Drone(vehicleName)
 {
-	_rel_position_sub = this->create_subscription<missions_interfaces::msg::RelPosition>(
-									"relPosition",
+	_quat_pos_sub = this->create_subscription<geometry_msgs::msg::Quaternion>(
+									"PositionQuat",
 									10,
-									[this](const missions_interfaces::msg::RelPosition::ConstSharedPtr msg){
+									[this](const geometry_msgs::msg::Quaternion::ConstSharedPtr msg){
 										_x = msg->x;
 										_y = msg->y;
 										_z = -1*msg->z;
-										_yaw = msg->yaw;
+										_yaw = msg->w;
 										_relPosPub_Active = true;
 										_timerActive1->cancel();
 										_timerActive1 = this->create_wall_timer(10000ms, std::bind(&DroneSupervised::timerActiveCallback1, this));
 									});
 
-	_velocity_sub = this->create_subscription<missions_interfaces::msg::Velocity>(
-									"Velocity",
+	_quat_vel_sub = this->create_subscription<geometry_msgs::msg::Quaternion>(
+									"VelocityQuat",
 									10,
-									[this](const missions_interfaces::msg::Velocity::ConstSharedPtr msg){
-										_x = msg->vx;
-										_y = msg->vy;
-										_z = -1*msg->vz;
-										_yaw = msg->yawspeed;
+									[this](const geometry_msgs::msg::Quaternion::ConstSharedPtr msg){
+										_x = msg->x;
+										_y = msg->y;
+										_z = -1*msg->z;
+										_yaw = msg->w;
 										_velPub_Active = true;
 										_timerActive2->cancel();
 										_timerActive2 = this->create_wall_timer(10000ms, std::bind(&DroneSupervised::timerActiveCallback2, this));
@@ -38,10 +38,13 @@ void DroneSupervised::timerActiveCallback2() { _velPub_stopped = true; }
 
 void DroneSupervised::timerCallback()
 {
-	if(_offboard_setpoint_counter == 5)
+	if (_offboard_setpoint_counter == 5)
+	{
+		this->setFlightMode(FlightMode::mTakeOff);
 		this->arm();
+	}
 
-	if(_offboard_setpoint_counter == 10)
+	if(_offboard_setpoint_counter == 100)
 		this->setFlightMode(FlightMode::mOffboard);
 
 

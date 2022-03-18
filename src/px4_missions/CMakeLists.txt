@@ -23,8 +23,6 @@ find_package(px4_msgs REQUIRED)
 find_package(nav_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
-find_package(missions_interfaces REQUIRED)
-
 
 
 
@@ -46,7 +44,7 @@ install(TARGETS simpleMission
 
 # missionSupervisor
 add_executable(missionSupervisor src/missionSupervisor.cpp)
-ament_target_dependencies(missionSupervisor rclcpp missions_interfaces)
+ament_target_dependencies(missionSupervisor rclcpp geometry_msgs)
 
 target_include_directories(missionSupervisor PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
@@ -61,7 +59,7 @@ install(TARGETS missionSupervisor
 
 # supervisedMission
 add_executable(supervisedMission src/supervisedMission.cpp src/supervised/droneSupervised.cpp src/base/droneBase.cpp)
-ament_target_dependencies(supervisedMission rclcpp px4_msgs missions_interfaces)
+ament_target_dependencies(supervisedMission rclcpp px4_msgs geometry_msgs)
 
 target_include_directories(supervisedMission PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>

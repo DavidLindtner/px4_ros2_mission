@@ -42,6 +42,12 @@ Clone PX4 firmware repository to your home directory or somewhere else.
 git clone https://github.com/PX4/PX4-Autopilot.git --recursive
 ```
 
+After succesfull cloning of PX4-Autopilot repository you need to install all dependencies:
+
+```bash
+bash ./PX4-Autopilot/Tools/setup/ubuntu.sh
+```
+
 ## PX4 ROS 2 communication bridge
 
 User guide for [PX4 ROS2 bridge](https://docs.px4.io/master/en/ros/ros2_comm.html)
@@ -145,20 +151,19 @@ git clone --recursive https://github.com/eProsima/Fast-DDS-Gen.git -b v1.0.4 ~/F
 
 1. Use the `build_ros2_workspace.bash` script to build the ROS 2 workspace (including `px4_ros_com` and `px4_msgs`).
 ```bash
-cd ~/px4_ros2_missions/src/px4_ros_com/scripts
+cd px4_ros2_missions/src/px4_ros_com/scripts
 source build_ros2_workspace.bash
 ```
 2. You will need to run this command on every new shell you open to have access to the ROS 2 workspace
 ```bash
-source ~/px4_ros2_sim/px4_ros_com_ros2/install/setup.bash
+source px4_ros2_missions/install/setup.bash
 ```
 Or put it into .bashrc
 ```bash
-echo "source ~/px4_ros2_sim/px4_ros_com_ros2/install/setup.bash" >> ~/.bashrc
+echo "source px4_ros2_missions/install/setup.bash" >> ~/.bashrc
 ```
-To build other packages in workspace run command:
+To build px4_misions package run command:
 ```bash
-colcon build --packages-select missions_interfaces
 colcon build --packages-select px4_missions
 ```
 

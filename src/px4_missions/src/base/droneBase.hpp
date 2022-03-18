@@ -30,7 +30,10 @@ public:
 	{ mOffboard, mTakeOff, mLand, mReturnToLaunch };
 
 	enum class OffboardControl
-	{ oRelPos, oAbsPos, oVelocity };
+	{ oRelPos, oVelocity };
+
+	struct Odometry
+	{ std::atomic<float> x, y, z, vx, vy, vz, rollspeed, pitchspeed, yawspeed; }odometry;
 
     void arm();
 	void disarm();
@@ -39,25 +42,19 @@ public:
 	void publish_offboard_control_mode(OffboardControl mode);
 	void publish_traj_setp_position(float x, float y, float z, float yaw);
 	void publish_traj_setp_speed(float vx, float vy, float vz, float yawspeed);
+
+private:
 	void publish_vehicle_command(uint16_t command, float param1 = 0.0, float param2 = 0.0, float param3 = 0.0, float param4 = 0.0, float param5 = 0.0, float param6 = 0.0, float param7 = 0.0);
 
-
 	std::atomic<uint64_t> _timestamp;
-
-	std::atomic<double> _latitude;
-	std::atomic<double> _longitude;
-	std::atomic<double> _altitude;
 
 	rclcpp::Publisher<OffboardControlMode>::SharedPtr _offboard_control_mode_publisher;
 	rclcpp::Publisher<TrajectorySetpoint>::SharedPtr _trajectory_setpoint_publisher;
 	rclcpp::Publisher<VehicleCommand>::SharedPtr _vehicle_command_publisher;
+	//rclcpp::Publisher<PositionSetpoint>::SharedPtr _position_setpoint_publisher;
 
-	rclcpp::Subscription<px4_msgs::msg::VehicleOdometry>::SharedPtr _vehicle_odometry_sub;
-	rclcpp::Subscription<px4_msgs::msg::VehicleGpsPosition>::SharedPtr _vehicle_gps_sub;
-	rclcpp::Subscription<px4_msgs::msg::VehicleGlobalPositionGroundtruth>::SharedPtr _vehicle_gps_ground_sub;
-	rclcpp::Subscription<px4_msgs::msg::VehicleGlobalPosition>::SharedPtr _vehicle_global_position_sub;
 	rclcpp::Subscription<px4_msgs::msg::Timesync>::SharedPtr _timesync_sub;
-
+	rclcpp::Subscription<px4_msgs::msg::VehicleOdometry>::SharedPtr _vehicle_odometry_sub;
 };
 
 
