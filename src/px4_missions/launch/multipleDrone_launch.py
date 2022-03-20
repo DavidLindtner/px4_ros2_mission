@@ -5,19 +5,19 @@ from launch_ros.actions import Node
 
 def generate_launch_description():
     ld = LaunchDescription()
-
+ 
     node1=Node(
         package = 'px4_missions',
-        executable = 'supervisedMission',
+        executable = 'simpleMission',
         namespace = 'vhcl0'
     )
+    
     node2=Node(
         package = 'px4_missions',
-        executable = 'missionSupervisor',
-        namespace = 'vhcl0',
-        parameters = [os.path.join(get_package_share_directory('px4_missions'), 'params', 'mission2.yaml')]
+        executable = 'simpleMission',
+        namespace = 'vhcl1'
     )
-    
+ 
     ld.add_action(node1)
     ld.add_action(node2)
     return ld

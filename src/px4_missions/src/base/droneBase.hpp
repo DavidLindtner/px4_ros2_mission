@@ -24,10 +24,10 @@ using namespace px4_msgs::msg;
 class Drone : public rclcpp::Node
 {
 public:
-	Drone(std::string vehicleName = "");
+	Drone();
 
 	enum class FlightMode
-	{ mOffboard, mTakeOff, mLand, mReturnToLaunch };
+	{ mOffboard, mTakeOff, mLand, mReturnToLaunch, mHold };
 
 	enum class OffboardControl
 	{ oRelPos, oVelocity };

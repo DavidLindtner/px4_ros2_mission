@@ -1,6 +1,6 @@
 #include "droneSupervised.hpp"
 
-DroneSupervised::DroneSupervised(std::string vehicleName) : Drone(vehicleName)
+DroneSupervised::DroneSupervised() : Drone()
 {
 	_quat_pos_sub = this->create_subscription<geometry_msgs::msg::Quaternion>(
 									"PositionQuat",
@@ -38,11 +38,11 @@ void DroneSupervised::timerActiveCallback2() { _velPub_stopped = true; }
 
 void DroneSupervised::timerCallback()
 {
-	if (_offboard_setpoint_counter == 5)
-	{
+	if (_offboard_setpoint_counter == 0)
 		this->setFlightMode(FlightMode::mTakeOff);
+
+	if (_offboard_setpoint_counter == 5)
 		this->arm();
-	}
 
 	if(_offboard_setpoint_counter == 100)
 		this->setFlightMode(FlightMode::mOffboard);
@@ -58,7 +58,6 @@ void DroneSupervised::timerCallback()
 		this->publish_offboard_control_mode(OffboardControl::oVelocity);
 		this->publish_traj_setp_speed(_x, _y, _z, _yaw);
 	}
-	//RCLCPP_INFO(this->get_logger(), "DATA: %f, %f, %f, %f, %d, %d", _x.load(), _y.load(), _z.load(), _yaw.load(), _relPosPub_Active, _velPub_Active);
 
 	if((_velPub_Active && _velPub_stopped ) || (_relPosPub_Active && _resPosPub_stopped))
 	{

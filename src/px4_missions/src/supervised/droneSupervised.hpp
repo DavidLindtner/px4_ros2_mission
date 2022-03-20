@@ -8,7 +8,7 @@
 class DroneSupervised : public Drone
 {
 public:
-	DroneSupervised(std::string vehicleName = "");
+	DroneSupervised();
 
 private:
 

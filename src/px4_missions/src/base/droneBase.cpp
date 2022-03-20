@@ -1,22 +1,20 @@
 #include "droneBase.hpp"
 
-Drone::Drone(std::string vehicleName) : Node("Drone")
+Drone::Drone() : Node("Drone")
 {
-	RCLCPP_INFO(this->get_logger(),  "Vehicle name: " + vehicleName);
-
-	_offboard_control_mode_publisher = this->create_publisher<OffboardControlMode>(vehicleName + "fmu/offboard_control_mode/in", 10);
-	_trajectory_setpoint_publisher = this->create_publisher<TrajectorySetpoint>(vehicleName + "fmu/trajectory_setpoint/in", 10);
-	_vehicle_command_publisher = this->create_publisher<VehicleCommand>(vehicleName + "fmu/vehicle_command/in", 10);
+	_offboard_control_mode_publisher = this->create_publisher<OffboardControlMode>("fmu/offboard_control_mode/in", 10);
+	_trajectory_setpoint_publisher = this->create_publisher<TrajectorySetpoint>("fmu/trajectory_setpoint/in", 10);
+	_vehicle_command_publisher = this->create_publisher<VehicleCommand>("fmu/vehicle_command/in", 10);
 
 	_timesync_sub = this->create_subscription<px4_msgs::msg::Timesync>(
-										vehicleName + "fmu/timesync/out", 
+										"fmu/timesync/out", 
 										10, 
 										[this](const px4_msgs::msg::Timesync::UniquePtr msg) {
 											_timestamp.store(msg->timestamp);
 										});
 
 	_vehicle_odometry_sub = this->create_subscription<px4_msgs::msg::VehicleOdometry>(
-										vehicleName + "fmu/vehicle_odometry/out",
+										"fmu/vehicle_odometry/out",
 										10,
 										[this](px4_msgs::msg::VehicleOdometry::ConstSharedPtr msg) {
 											odometry.x.store(msg->x);
@@ -58,6 +56,11 @@ void Drone::setFlightMode(FlightMode mode)
 		case FlightMode::mReturnToLaunch:
 			this->publish_vehicle_command(VehicleCommand::VEHICLE_CMD_NAV_RETURN_TO_LAUNCH);
 			RCLCPP_INFO(this->get_logger(), "Return to Launch flight mode set");
+			break;
+
+		case FlightMode::mHold:
+			this->publish_vehicle_command(VehicleCommand::VEHICLE_CMD_DO_SET_MODE, 1, 4, 3);
+			RCLCPP_INFO(this->get_logger(), "Hold flight mode set");
 			break;
 			
 		default:

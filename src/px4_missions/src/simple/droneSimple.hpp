@@ -6,7 +6,7 @@
 class DroneSimple : public Drone
 {
 public:
-	DroneSimple(std::string vehicleName = "");
+	DroneSimple();
 
 private:
 

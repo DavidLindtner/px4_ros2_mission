@@ -5,7 +5,7 @@
 # 1 - relative position
 # 2 - velocity
 
-/mission_supervisor:
+/**:
   ros__parameters:
     offboardMode: 2
     x:
@@ -29,7 +29,7 @@
     - 3.0
     - -1.0
     - 0.0
-    - 0.0
+    - -1.0
     - -1.0
     - 0.0
     yaw:
