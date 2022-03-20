@@ -48,6 +48,12 @@ After succesfull cloning of PX4-Autopilot repository you need to install all dep
 bash ./PX4-Autopilot/Tools/setup/ubuntu.sh
 ```
 
+To install gazebo plugins run command
+
+```bash
+sudo apt install ros-foxy-gazebo-ros-pkgs
+```
+
 ## PX4 ROS 2 communication bridge
 
 User guide for [PX4 ROS2 bridge](https://docs.px4.io/master/en/ros/ros2_comm.html)
