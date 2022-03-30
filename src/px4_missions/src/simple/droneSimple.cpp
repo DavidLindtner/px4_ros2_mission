@@ -13,10 +13,10 @@ void DroneSimple::flight_mode_timer_callback()
 		RCLCPP_INFO(this->get_logger(), "Odometry\nx: %f\ny: %f\nz: %f\nvx: %f\nvy: %f\nvz: %f", odometry.x.load(), odometry.y.load(), odometry.z.load(), odometry.vx.load(), odometry.vy.load(), odometry.vz.load());
 
 
-	if (_offboard_setpoint_counter == 0)
+	if (_offboard_setpoint_counter == 5)
 		this->setFlightMode(FlightMode::mTakeOff);
 
-	if (_offboard_setpoint_counter == 5)
+	if (_offboard_setpoint_counter == 10)
 		this->arm();
 
 	if (_offboard_setpoint_counter == 100)
@@ -36,9 +36,10 @@ void DroneSimple::flight_mode_timer_callback()
 		this->publish_traj_setp_position(10.0, -10.0, -10.0, 0.0);
 	}
 
+
 	if (_offboard_setpoint_counter == 500)
 	{
-		this->setFlightMode(FlightMode::mLand);
+		this->setFlightMode(FlightMode::mReturnToLaunch);
 	}
 
 	_offboard_setpoint_counter++;

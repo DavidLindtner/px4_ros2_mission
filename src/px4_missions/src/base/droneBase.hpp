@@ -4,9 +4,7 @@
 #include <px4_msgs/msg/offboard_control_mode.hpp>
 #include <px4_msgs/msg/trajectory_setpoint.hpp>
 #include <px4_msgs/msg/timesync.hpp>
-#include <px4_msgs/msg/vehicle_gps_position.hpp>
-#include <px4_msgs/msg/vehicle_global_position_groundtruth.hpp>
-#include <px4_msgs/msg/vehicle_global_position.hpp>
+#include <px4_msgs/msg/position_setpoint_triplet.hpp>
 #include <px4_msgs/msg/vehicle_odometry.hpp>
 #include <px4_msgs/msg/vehicle_command.hpp>
 #include <px4_msgs/msg/vehicle_control_mode.hpp>
@@ -35,6 +33,13 @@ public:
 	struct Odometry
 	{ std::atomic<float> x, y, z, vx, vy, vz, rollspeed, pitchspeed, yawspeed; }odometry;
 
+	struct Waypoint
+	{
+		double lat;
+		double lon;
+		double alt;
+	};
+
     void arm();
 	void disarm();
     void setFlightMode(FlightMode mode);
@@ -42,6 +47,7 @@ public:
 	void publish_offboard_control_mode(OffboardControl mode);
 	void publish_traj_setp_position(float x, float y, float z, float yaw);
 	void publish_traj_setp_speed(float vx, float vy, float vz, float yawspeed);
+	void publish_position_setpoint(Waypoint waypoint); // NOT YET WORKING
 
 private:
 	void publish_vehicle_command(uint16_t command, float param1 = 0.0, float param2 = 0.0, float param3 = 0.0, float param4 = 0.0, float param5 = 0.0, float param6 = 0.0, float param7 = 0.0);
@@ -51,7 +57,7 @@ private:
 	rclcpp::Publisher<OffboardControlMode>::SharedPtr _offboard_control_mode_publisher;
 	rclcpp::Publisher<TrajectorySetpoint>::SharedPtr _trajectory_setpoint_publisher;
 	rclcpp::Publisher<VehicleCommand>::SharedPtr _vehicle_command_publisher;
-	//rclcpp::Publisher<PositionSetpoint>::SharedPtr _position_setpoint_publisher;
+	rclcpp::Publisher<PositionSetpointTriplet>::SharedPtr _position_setpoint_triplet_publisher; // NOT YET WORKING
 
 	rclcpp::Subscription<px4_msgs::msg::Timesync>::SharedPtr _timesync_sub;
 	rclcpp::Subscription<px4_msgs::msg::VehicleOdometry>::SharedPtr _vehicle_odometry_sub;

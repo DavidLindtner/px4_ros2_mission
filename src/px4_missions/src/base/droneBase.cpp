@@ -128,6 +128,26 @@ void Drone::publish_traj_setp_speed(float vx, float vy, float vz, float yawspeed
 }
 
 
+void Drone::publish_position_setpoint(Waypoint waypoint)
+{
+	// NOT YET WORKING
+	PositionSetpointTriplet msg{};
+	msg.timestamp = _timestamp.load();
+	msg.previous.valid = true;
+	msg.previous.lat = 49.228754;
+	msg.previous.lon = 16.573077;
+	msg.previous.alt = 285;
+
+	msg.current.lat = waypoint.lat;
+	msg.current.lon = waypoint.lon;
+	msg.current.alt = waypoint.alt;
+
+	msg.next.lat = waypoint.lat;
+	msg.next.lon = waypoint.lon;
+	msg.next.alt = waypoint.alt;
+}
+
+
 void Drone::publish_vehicle_command(uint16_t command, float param1, float param2, float param3, float param4, float param5, float param6, float param7)
 {
 	VehicleCommand msg{};
