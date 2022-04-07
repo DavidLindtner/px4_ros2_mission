@@ -30,7 +30,7 @@ find_package(geometry_msgs REQUIRED)
 
 # simpleMission
 add_executable(simpleMission src/simpleMission.cpp src/simple/droneSimple.cpp src/base/droneBase.cpp)
-ament_target_dependencies(simpleMission rclcpp px4_msgs)
+ament_target_dependencies(simpleMission rclcpp px4_msgs mavros_msgs)
 
 target_include_directories(simpleMission PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
@@ -60,7 +60,7 @@ install(TARGETS missionSupervisor
 
 # supervisedMission
 add_executable(supervisedMission src/supervisedMission.cpp src/supervised/droneSupervised.cpp src/base/droneBase.cpp)
-ament_target_dependencies(supervisedMission rclcpp px4_msgs geometry_msgs)
+ament_target_dependencies(supervisedMission rclcpp px4_msgs geometry_msgs mavros_msgs)
 
 target_include_directories(supervisedMission PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>

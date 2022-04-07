@@ -34,8 +34,9 @@ Drone::Drone() : Node("Drone")
 	_mavros_state_sub = this->create_subscription<mavros_msgs::msg::State>(
 										"mavros/state", 
 										10, 
-										[this](const mavros_msgs::msg::State::ConstPtr& msg) {
+										[this](mavros_msgs::msg::State::ConstSharedPtr msg) {
 											_current_state = *msg;
+											std::cout<<msg->connected<<std::endl;
 										});
 
 
