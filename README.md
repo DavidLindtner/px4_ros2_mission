@@ -39,7 +39,17 @@ ros2 run px4_missions simpleMission
 ros2 launch px4_missions supervised_launch.py
 ```
 
-## Run simulation with multiple wehicles - NOT YET DEVELOPED
+## Run simulation with multiple wehicles - NOT YET NOT WORKING
+
+> **ISSUES:**
+>
+> It is not possible to send commands to second instance of vehicle through RTPS
+>
+>https://github.com/PX4/PX4-Autopilot/issues/18143
+>
+>https://discuss.px4.io/t/multi-vehicle-simulation-rtps-gazebo-ros2/26578
+>
+
 
 To start multiple wehicle simulation (multiple instances of PX4 firmware) with gazebo simulator run command in PX4-Autopilot directory:
 ```bash

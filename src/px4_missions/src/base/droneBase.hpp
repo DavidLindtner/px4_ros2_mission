@@ -25,7 +25,7 @@ public:
 	Drone();
 
 	enum class FlightMode
-	{ mOffboard, mTakeOff, mLand, mReturnToLaunch, mHold };
+	{ mOffboard, mTakeOff, mLand, mReturnToLaunch, mHold, mMission };
 
 	enum class OffboardControl
 	{ oRelPos, oVelocity };

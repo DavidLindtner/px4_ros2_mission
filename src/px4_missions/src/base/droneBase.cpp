@@ -62,6 +62,11 @@ void Drone::setFlightMode(FlightMode mode)
 			this->publish_vehicle_command(VehicleCommand::VEHICLE_CMD_DO_SET_MODE, 1, 4, 3);
 			RCLCPP_INFO(this->get_logger(), "Hold flight mode set");
 			break;
+
+		case FlightMode::mMission:
+			this->publish_vehicle_command(VehicleCommand::VEHICLE_CMD_DO_SET_MODE, 1, 4, 4);
+			RCLCPP_INFO(this->get_logger(), "Mission flight mode set");
+			break;
 			
 		default:
 			RCLCPP_INFO(this->get_logger(), "No flight mode set");
