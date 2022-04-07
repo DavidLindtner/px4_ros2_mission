@@ -29,6 +29,17 @@ Drone::Drone() : Node("Drone")
 										});
 
 
+
+
+	_mavros_state_sub = this->create_subscription<mavros_msgs::msg::State>(
+										"mavros/state", 
+										10, 
+										[this](const mavros_msgs::msg::State::ConstPtr& msg) {
+											_current_state = *msg;
+										});
+
+
+
     //this->publish_vehicle_command(VehicleCommand::VEHICLE_CMD_DO_SET_PARAMETER, 175, 4);
 }
 

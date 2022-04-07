@@ -9,6 +9,10 @@
 #include <px4_msgs/msg/vehicle_command.hpp>
 #include <px4_msgs/msg/vehicle_control_mode.hpp>
 
+//#include <mavros_msgs/CommandBool.h>
+//#include <mavros_msgs/msg/SetMode.h>
+#include <mavros_msgs/msg/state.hpp>
+
 #include <rclcpp/rclcpp.hpp>
 #include <stdint.h>
 
@@ -61,6 +65,12 @@ private:
 
 	rclcpp::Subscription<px4_msgs::msg::Timesync>::SharedPtr _timesync_sub;
 	rclcpp::Subscription<px4_msgs::msg::VehicleOdometry>::SharedPtr _vehicle_odometry_sub;
+
+	// MAVROS SUB AND PUB
+	rclcpp::Subscription<mavros_msgs::msg::State>::SharedPtr _mavros_state_sub;
+
+	mavros_msgs::msg::State _current_state;
+
 };
 
 
