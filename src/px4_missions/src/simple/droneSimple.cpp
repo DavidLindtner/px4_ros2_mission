@@ -9,8 +9,8 @@ DroneSimple::DroneSimple() : Drone()
 void DroneSimple::flight_mode_timer_callback()
 {
 
-	if(_offboard_setpoint_counter % 20 == 0)
-		RCLCPP_INFO(this->get_logger(), "Odometry\nx: %f\ny: %f\nz: %f\nvx: %f\nvy: %f\nvz: %f", odometry.x.load(), odometry.y.load(), odometry.z.load(), odometry.vx.load(), odometry.vy.load(), odometry.vz.load());
+	//if(_offboard_setpoint_counter % 20 == 0)
+	//	RCLCPP_INFO(this->get_logger(), "Odometry\nx: %f\ny: %f\nz: %f\nvx: %f\nvy: %f\nvz: %f", odometry.x.load(), odometry.y.load(), odometry.z.load(), odometry.vx.load(), odometry.vy.load(), odometry.vz.load());
 
 
 	if (_offboard_setpoint_counter == 5)

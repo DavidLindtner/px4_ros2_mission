@@ -36,7 +36,8 @@ Drone::Drone() : Node("Drone")
 										10, 
 										[this](mavros_msgs::msg::State::ConstSharedPtr msg) {
 											_current_state = *msg;
-											std::cout<<msg->connected<<std::endl;
+											std::cout<<"Mavros:"<<std::endl;
+											std::cout<<msg->armed<<std::endl;
 										});
 
 
