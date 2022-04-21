@@ -1,9 +1,10 @@
 #ifndef __DRONE_SIMPLE_HPP__
 #define __DRONE_SIMPLE_HPP__
 
-#include "../base/droneBase.hpp"
+#include "../base/droneBaseRTPS.hpp"
+#include "../base/droneBaseMavlink.hpp"
 
-class DroneSimple : public Drone
+class DroneSimple : public DroneMavlink
 {
 public:
 	DroneSimple();

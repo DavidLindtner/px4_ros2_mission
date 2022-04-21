@@ -1,6 +1,6 @@
 #include "droneSupervised.hpp"
 
-DroneSupervised::DroneSupervised() : Drone()
+DroneSupervised::DroneSupervised() : DroneRTPS()
 {
 	_quat_pos_sub = this->create_subscription<geometry_msgs::msg::Quaternion>(
 									"PositionQuat",

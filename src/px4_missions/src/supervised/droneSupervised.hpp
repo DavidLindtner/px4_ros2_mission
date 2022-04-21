@@ -1,11 +1,12 @@
 #ifndef __DRONE_SUPERVISED_HPP__
 #define __DRONE_SUPERVISED_HPP__
 
-#include "../base/droneBase.hpp"
+#include "../base/droneBaseRTPS.hpp"
+#include "../base/droneBaseMavlink.hpp"
 
 #include <geometry_msgs/msg/quaternion.hpp>
 
-class DroneSupervised : public Drone
+class DroneSupervised : public DroneRTPS
 {
 public:
 	DroneSupervised();

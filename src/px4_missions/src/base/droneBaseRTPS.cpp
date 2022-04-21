@@ -1,6 +1,6 @@
-#include "droneBase.hpp"
+#include "droneBaseRTPS.hpp"
 
-Drone::Drone() : Node("Drone")
+DroneRTPS::DroneRTPS() : Node("DroneRTPS")
 {
 	_offboard_control_mode_publisher = this->create_publisher<OffboardControlMode>("fmu/offboard_control_mode/in", 10);
 	_trajectory_setpoint_publisher = this->create_publisher<TrajectorySetpoint>("fmu/trajectory_setpoint/in", 10);
@@ -28,25 +28,11 @@ Drone::Drone() : Node("Drone")
 											odometry.yawspeed.store(msg->yawspeed);
 										});
 
-
-
-
-	_mavros_state_sub = this->create_subscription<mavros_msgs::msg::State>(
-										"mavros/state", 
-										10, 
-										[this](mavros_msgs::msg::State::ConstSharedPtr msg) {
-											_current_state = *msg;
-											std::cout<<"Mavros:"<<std::endl;
-											std::cout<<msg->armed<<std::endl;
-										});
-
-
-
     //this->publish_vehicle_command(VehicleCommand::VEHICLE_CMD_DO_SET_PARAMETER, 175, 4);
 }
 
 
-void Drone::setFlightMode(FlightMode mode)
+void DroneRTPS::setFlightMode(FlightMode mode)
 {
 	switch (mode)
 	{
@@ -87,21 +73,21 @@ void Drone::setFlightMode(FlightMode mode)
 }
 
 
-void Drone::arm()
+void DroneRTPS::arm()
 {
 	publish_vehicle_command(VehicleCommand::VEHICLE_CMD_COMPONENT_ARM_DISARM, 1.0);
 	RCLCPP_INFO(this->get_logger(), "Arm command send");
 }
 
 
-void Drone::disarm()
+void DroneRTPS::disarm()
 {
 	publish_vehicle_command(VehicleCommand::VEHICLE_CMD_COMPONENT_ARM_DISARM, 0.0);
 	RCLCPP_INFO(this->get_logger(), "Disarm command send");
 }
 
 
-void Drone::publish_offboard_control_mode(OffboardControl mode)
+void DroneRTPS::publish_offboard_control_mode(OffboardControl mode)
 {
 	OffboardControlMode msg{};
 	msg.timestamp = _timestamp.load();
@@ -114,7 +100,7 @@ void Drone::publish_offboard_control_mode(OffboardControl mode)
 }
 
 
-void Drone::publish_traj_setp_position(float x, float y, float z, float yaw)
+void DroneRTPS::publish_traj_setp_position(float x, float y, float z, float yaw)
 {
 	TrajectorySetpoint msg{};
 	msg.timestamp = _timestamp.load();
@@ -130,7 +116,7 @@ void Drone::publish_traj_setp_position(float x, float y, float z, float yaw)
 }
 
 
-void Drone::publish_traj_setp_speed(float vx, float vy, float vz, float yawspeed)
+void DroneRTPS::publish_traj_setp_speed(float vx, float vy, float vz, float yawspeed)
 {
 	TrajectorySetpoint msg{};
 	msg.timestamp = _timestamp.load();
@@ -146,27 +132,7 @@ void Drone::publish_traj_setp_speed(float vx, float vy, float vz, float yawspeed
 }
 
 
-void Drone::publish_position_setpoint(Waypoint waypoint)
-{
-	// NOT YET WORKING
-	PositionSetpointTriplet msg{};
-	msg.timestamp = _timestamp.load();
-	msg.previous.valid = true;
-	msg.previous.lat = 49.228754;
-	msg.previous.lon = 16.573077;
-	msg.previous.alt = 285;
-
-	msg.current.lat = waypoint.lat;
-	msg.current.lon = waypoint.lon;
-	msg.current.alt = waypoint.alt;
-
-	msg.next.lat = waypoint.lat;
-	msg.next.lon = waypoint.lon;
-	msg.next.alt = waypoint.alt;
-}
-
-
-void Drone::publish_vehicle_command(uint16_t command, float param1, float param2, float param3, float param4, float param5, float param6, float param7)
+void DroneRTPS::publish_vehicle_command(uint16_t command, float param1, float param2, float param3, float param4, float param5, float param6, float param7)
 {
 	VehicleCommand msg{};
 	msg.timestamp = _timestamp.load();
