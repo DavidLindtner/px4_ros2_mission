@@ -2,13 +2,13 @@
 
 DroneMavlink::DroneMavlink() : Node("DroneMavlink")
 {
-	_pos_setp_pub = this->create_publisher<geometry_msgs::msg::PoseStamped>("/mavros/setpoint_position/local", 10);
-	_vel_setp_pub = this->create_publisher<geometry_msgs::msg::TwistStamped>("/mavros/setpoint_velocity/cmd_vel", 10);
-	_geo_setp_pub = this->create_publisher<geographic_msgs::msg::GeoPoseStamped>("/mavros/setpoint_position/global", 10);
+	_pos_setp_pub = this->create_publisher<geometry_msgs::msg::PoseStamped>("/mavros/setpoint_position/local", 1);
+	_vel_setp_pub = this->create_publisher<geometry_msgs::msg::TwistStamped>("/mavros/setpoint_velocity/cmd_vel", 1);
+	_geo_setp_pub = this->create_publisher<geographic_msgs::msg::GeoPoseStamped>("/mavros/setpoint_position/global", 1);
 
 	_state_sub = this->create_subscription<mavros_msgs::msg::State>(
 										"/mavros/state", 
-										10, 
+										1, 
 										[this](mavros_msgs::msg::State::ConstSharedPtr msg) {
 											currentState = *msg;
 										});
@@ -16,7 +16,7 @@ DroneMavlink::DroneMavlink() : Node("DroneMavlink")
 	// NOT YET WORKING
 	_gps_sub = this->create_subscription<sensor_msgs::msg::NavSatFix>(
 										"/mavros/global_position/global", 
-										1000, 
+										1, 
 										[this](sensor_msgs::msg::NavSatFix::ConstSharedPtr msg) {
 											std::cout << "sme tu" << std::endl;
 											gpsPos = *msg;
@@ -25,14 +25,59 @@ DroneMavlink::DroneMavlink() : Node("DroneMavlink")
 
 	_cmd_cli = this->create_client<mavros_msgs::srv::CommandBool>("/mavros/cmd/arming");
 	_mode_cli = this->create_client<mavros_msgs::srv::SetMode>("/mavros/set_mode");
-    
-	//this->publish_vehicle_command(VehicleCommand::VEHICLE_CMD_DO_SET_PARAMETER, 175, 4);
+	_param_cli = this->create_client<mavros_msgs::srv::ParamSetV2>("/mavros/param/set");
+
+}
+
+
+void DroneMavlink::preFlightCheck(float takeOffAlt)
+{
+	changeParam("MIS_TAKEOFF_ALT", 3, 0, takeOffAlt);
+	RCLCPP_INFO(this->get_logger(), "TakeOff height set to %f", takeOffAlt);
+
+	changeParam("COM_RCL_EXCEPT", 2, 4, 0);
+	RCLCPP_INFO(this->get_logger(), "RC loss exceptions is set");
+
+	preFlightCheckOK = true;
+}
+
+
+void DroneMavlink::changeParam(std::string name, int type, int intVal, float floatVal)
+{
+	// check if services exist
+	while (!_param_cli->wait_for_service(1s))
+	{
+		if (!rclcpp::ok())
+		{
+			RCLCPP_ERROR(this->get_logger(), "Interrupted while waiting for the service. Exiting.");
+			exit(1);
+		}
+		RCLCPP_INFO(this->get_logger(), "service not available, waiting again...");
+	}
+
+  	auto request = std::make_shared<mavros_msgs::srv::ParamSetV2::Request>();
+
+	request->param_id = name;
+	request->value.type = type;
+	request->value.integer_value = intVal;
+	request->value.double_value = floatVal;
+
+	// wait for result
+    using ServiceResponseFuture = rclcpp::Client<mavros_msgs::srv::ParamSetV2>::SharedFuture;
+    auto response_received_callback = [this](ServiceResponseFuture future)
+	{
+		auto result = future.get();
+		if(!result->success)
+			RCLCPP_ERROR(this->get_logger(), "ERROR SETTING PARAMETER");
+    };
+    auto future_result = _param_cli->async_send_request(request, response_received_callback);
 }
 
 
 void DroneMavlink::setFlightMode(FlightMode mode)
 {
-	while (!_cmd_cli->wait_for_service(1s))
+	// check if services exist
+	while (!_mode_cli->wait_for_service(1s))
 	{
 		if (!rclcpp::ok())
 		{
@@ -49,50 +94,62 @@ void DroneMavlink::setFlightMode(FlightMode mode)
 		case FlightMode::mOffboard:
 			request->base_mode = 0;
 			request->custom_mode = "OFFBOARD";
-			RCLCPP_INFO(this->get_logger(), "Offboard flight mode set");
+			_flightMode = "OFFBOARD";
 			break;
 
 		case FlightMode::mTakeOff:
 			request->base_mode = 0;
 			request->custom_mode = "AUTO.TAKEOFF";
-			RCLCPP_INFO(this->get_logger(), "TakeOff flight mode set");
+			_flightMode = "TAKEOFF";
 			break;
 			
 		case FlightMode::mLand:
 			request->base_mode = 0;
 			request->custom_mode = "AUTO.LAND";
-			RCLCPP_INFO(this->get_logger(), "Land flight mode set");
+			_flightMode = "LAND";
 			break;
 			
 		case FlightMode::mReturnToLaunch:
 			request->base_mode = 0;
 			request->custom_mode = "AUTO.RTL";
-			RCLCPP_INFO(this->get_logger(), "Return to Launch flight mode set");
+			_flightMode = "RTL";
 			break;
 
 		case FlightMode::mHold:
 			request->base_mode = 0;
 			request->custom_mode = "AUTO.LOITER";
-			RCLCPP_INFO(this->get_logger(), "Hold flight mode set");
+			_flightMode = "HOLD";
 			break;
 
 		// NOT YET WORKING
 		case FlightMode::mMission:
 			request->base_mode = 0;
 			request->custom_mode = "AUTO.MISSION";
-			RCLCPP_INFO(this->get_logger(), "Mission flight mode set");
+			_flightMode = "MISSION";
 			break;
 			
 		default:
 			RCLCPP_INFO(this->get_logger(), "No flight mode set");
 	}
 
-	auto result = _mode_cli->async_send_request(request);
+	// wait for result
+    using ServiceResponseFuture = rclcpp::Client<mavros_msgs::srv::SetMode>::SharedFuture;
+    auto response_received_callback = [this](ServiceResponseFuture future)
+	{
+		auto result = future.get();
+		if(result->mode_sent)
+			RCLCPP_INFO(this->get_logger(), "%s flight mode set", _flightMode.c_str());
+		else
+			RCLCPP_ERROR(this->get_logger(), "FLIGHT MODE CHANGE ERROR");
+    };
+    auto future_result = _mode_cli->async_send_request(request, response_received_callback);
+
 }
 
 
 void DroneMavlink::arm()
 {
+	// check if services exist
 	while (!_cmd_cli->wait_for_service(1s))
 	{
 		if (!rclcpp::ok())
@@ -105,14 +162,24 @@ void DroneMavlink::arm()
 
   	auto request = std::make_shared<mavros_msgs::srv::CommandBool::Request>();
 	request->value = true;
-	auto result = _cmd_cli->async_send_request(request);
 
-	RCLCPP_INFO(this->get_logger(), "Arm command send");
+	// wait for result
+    using ServiceResponseFuture = rclcpp::Client<mavros_msgs::srv::CommandBool>::SharedFuture;
+    auto response_received_callback = [this](ServiceResponseFuture future)
+	{
+		auto result = future.get();
+		if(result->success)
+			RCLCPP_INFO(this->get_logger(), "Arm command send");
+		else
+			RCLCPP_ERROR(this->get_logger(), "ARMING ERROR");
+    };
+    auto future_result = _cmd_cli->async_send_request(request, response_received_callback);
 }
 
 
 void DroneMavlink::disarm()
 {
+	// check if services exist
 	while (!_cmd_cli->wait_for_service(1s))
 	{
 		if (!rclcpp::ok())
@@ -122,11 +189,21 @@ void DroneMavlink::disarm()
 		}
 		RCLCPP_INFO(this->get_logger(), "service not available, waiting again...");
 	}
+
   	auto request = std::make_shared<mavros_msgs::srv::CommandBool::Request>();
 	request->value = false;
-	auto result = _cmd_cli->async_send_request(request);
 
-	RCLCPP_INFO(this->get_logger(), "Disarm command send");
+	// wait for result
+    using ServiceResponseFuture = rclcpp::Client<mavros_msgs::srv::CommandBool>::SharedFuture;
+    auto response_received_callback = [this](ServiceResponseFuture future)
+	{
+		auto result = future.get();
+		if(result->success)
+			RCLCPP_INFO(this->get_logger(), "Disarm command send");
+		else
+			RCLCPP_ERROR(this->get_logger(), "DISARMING ERROR");
+    };
+    auto future_result = _cmd_cli->async_send_request(request, response_received_callback);
 }
 
 

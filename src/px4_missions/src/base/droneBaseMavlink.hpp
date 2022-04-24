@@ -1,15 +1,17 @@
 #ifndef __DRONE_BASE_MAVLINK_HPP__
 #define __DRONE_BASE_MAVLINK_HPP__
 
-
-#include <mavros_msgs/msg/state.hpp>
-#include <sensor_msgs/msg/nav_sat_fix.hpp>
-#include <mavros_msgs/srv/command_bool.hpp>
-#include <mavros_msgs/srv/set_mode.hpp>
-
 #include <geometry_msgs/msg/pose_stamped.hpp>
 #include <geometry_msgs/msg/twist_stamped.hpp>
 #include <geographic_msgs/msg/geo_pose_stamped.hpp>
+
+#include <sensor_msgs/msg/nav_sat_fix.hpp>
+
+#include <mavros_msgs/msg/state.hpp>
+
+#include <mavros_msgs/srv/command_bool.hpp>
+#include <mavros_msgs/srv/set_mode.hpp>
+#include <mavros_msgs/srv/param_set_v2.hpp>
 
 #include <rclcpp/rclcpp.hpp>
 #include <stdint.h>
@@ -33,9 +35,14 @@ public:
 	mavros_msgs::msg::State currentState;
 	sensor_msgs::msg::NavSatFix gpsPos;
 
+	bool preFlightCheckOK = false;
+
     void arm();
 	void disarm();
     void setFlightMode(FlightMode mode);
+    void preFlightCheck(float takeOffAlt);
+
+	void changeParam(std::string name, int type, int intVal, float floatVal);
 
 	void publish_traj_setp_position(float x, float y, float z, float yaw);
 	void publish_traj_setp_speed(float vx, float vy, float vz, float yawspeed);
@@ -56,6 +63,9 @@ private:
 
 	rclcpp::Client<mavros_msgs::srv::CommandBool>::SharedPtr _cmd_cli;
 	rclcpp::Client<mavros_msgs::srv::SetMode>::SharedPtr _mode_cli;
+	rclcpp::Client<mavros_msgs::srv::ParamSetV2>::SharedPtr _param_cli;
+
+	std::string _flightMode;
 };
 
 
