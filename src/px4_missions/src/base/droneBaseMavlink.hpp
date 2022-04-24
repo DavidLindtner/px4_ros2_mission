@@ -6,8 +6,8 @@
 #include <geographic_msgs/msg/geo_pose_stamped.hpp>
 
 #include <sensor_msgs/msg/nav_sat_fix.hpp>
-
 #include <mavros_msgs/msg/state.hpp>
+#include <mavros_msgs/msg/altitude.hpp>
 
 #include <mavros_msgs/srv/command_bool.hpp>
 #include <mavros_msgs/srv/set_mode.hpp>
@@ -16,6 +16,7 @@
 #include <rclcpp/rclcpp.hpp>
 #include <stdint.h>
 
+#include <math.h>
 #include <chrono>
 #include <iostream>
 #include <cstdlib>
@@ -32,8 +33,18 @@ public:
 	enum class FlightMode
 	{ mOffboard, mTakeOff, mLand, mReturnToLaunch, mHold, mMission };
 
+	struct
+	{
+		float lat;
+		float lon;
+		float alt;
+	}lastGlobalSetpoint;
+
 	mavros_msgs::msg::State currentState;
 	sensor_msgs::msg::NavSatFix gpsPos;
+	geometry_msgs::msg::PoseStamped locPos;
+	float altitude = 0;
+
 
 	bool preFlightCheckOK = false;
 
@@ -42,20 +53,22 @@ public:
     void setFlightMode(FlightMode mode);
     void preFlightCheck(float takeOffAlt);
 
-	void changeParam(std::string name, int type, int intVal, float floatVal);
-
 	void publish_traj_setp_position(float x, float y, float z, float yaw);
 	void publish_traj_setp_speed(float vx, float vy, float vz, float yawspeed);
 	void publish_traj_setp_geo(float lat, float lon, float alt);
 
+	bool isGlSetpReached();
+
 private:
-	void publish_vehicle_command(uint16_t command, float param1 = 0.0, float param2 = 0.0, float param3 = 0.0, float param4 = 0.0, float param5 = 0.0, float param6 = 0.0, float param7 = 0.0);
+	void changeParam(std::string name, int type, int intVal, float floatVal);
 
 	std::atomic<uint64_t> _timestamp;
 
 	// MAVROS SUB AND PUB AND CLI
 	rclcpp::Subscription<mavros_msgs::msg::State>::SharedPtr _state_sub;
+	rclcpp::Subscription<mavros_msgs::msg::Altitude>::SharedPtr _alt_sub;
 	rclcpp::Subscription<sensor_msgs::msg::NavSatFix>::SharedPtr _gps_sub;
+	rclcpp::Subscription<geometry_msgs::msg::PoseStamped>::SharedPtr _loc_pose_sub;
 
 	rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr _pos_setp_pub;
 	rclcpp::Publisher<geometry_msgs::msg::TwistStamped>::SharedPtr _vel_setp_pub;

@@ -12,8 +12,8 @@ void DroneSimple::flight_mode_timer_callback()
 	switch(state)
 	{
 		case 0:
-			// Wait for TakeOff start for 1 sec
-			if(programCounter == 10)
+			// Wait 1 sec
+			if(stateCounter >= 10)
 				state = 10;
 			break;
 
@@ -24,34 +24,42 @@ void DroneSimple::flight_mode_timer_callback()
 			break;
 
 		case 20:
-			// TakeOff flight mode command send
-			if(currentState.mode == "AUTO.TAKEOFF")
+			// Wait for TakeOff start
+			if(stateCounter == 10)
 				state = 30;
 			break;
 
 		case 30:
-			// Arm command send
-			if(currentState.armed)
+			// TakeOff flight mode command send
+			if(currentState.mode == "AUTO.TAKEOFF")
 				state = 40;
 			break;
 
 		case 40:
-			// Wait for TakeOff end
-			if(currentState.mode == "AUTO.LOITER")
+			// Arm command send
+			if(currentState.armed)
 				state = 50;
 			break;
 
 		case 50:
-			// Offboard flight mode command send
-			if(currentState.mode == "OFFBOARD")
+			// Wait for TakeOff end
+			if(currentState.mode == "AUTO.LOITER")
 				state = 60;
 			break;
 
 		case 60:
-			// Wait for data
+			// Offboard flight mode command send
+			if(currentState.mode == "OFFBOARD")
+				state = 70;
 			break;
 
 		case 70:
+			// Wait for data
+			if(stateCounter == 500)
+				state = 80;
+			break;
+
+		case 80:
 			// Fly to waypoints
 			break;
 
@@ -65,7 +73,7 @@ void DroneSimple::flight_mode_timer_callback()
 	switch(state)
 	{
 		case 0:
-			// Wait for TakeOff start
+			// Wait 1 sec
 			break;
 
 		case 10:
@@ -75,32 +83,36 @@ void DroneSimple::flight_mode_timer_callback()
 			break;
 
 		case 20:
+			// Wait for TakeOff start
+			break;
+
+		case 30:
 			// TakeOff flight mode command send
 			if(stateCounter == 1)
 				this->setFlightMode(FlightMode::mTakeOff);
 			break;
 
-		case 30:
+		case 40:
 			// Arm command send
 			if(stateCounter == 1)
 				this->arm();
 			break;
 
-		case 40:
+		case 50:
 			// Wait for TakeOff end
 			break;
 
-		case 50:
+		case 60:
 			// Offboard flight mode command send
 			if(stateCounter == 1)
 				this->setFlightMode(FlightMode::mOffboard);
 			break;
 
-		case 60:
+		case 70:
 			// Wait for data
 			break;
 
-		case 70:
+		case 80:
 			// Fly to waypoints
 			break;
 
@@ -110,12 +122,20 @@ void DroneSimple::flight_mode_timer_callback()
 			break;
 	}
 
-	// OFFBOARD SETPOINTS SEND
-	if(state <= 60)
-		this->publish_traj_setp_speed(0.0, 0.0, 0.0, 0.0);
-	else if(state >= 70)
-		this->publish_traj_setp_geo(49.228754, 16.573077, 298);
+	if(state == 50 || state == 60)
+	{
+		holdLat = gpsPos.latitude;
+		holdLon = gpsPos.longitude;
+		holdAlt = altitude;
+	}
 
+	// OFFBOARD SETPOINTS SEND
+	if(state <= 70)
+		this->publish_traj_setp_geo(holdLat, holdLon, holdAlt);
+	else if(state >= 80)
+		this->publish_traj_setp_geo(49.228754, 16.572077, 300);
+
+	//RCLCPP_INFO(this->get_logger(), "Sme Tam %d", this->isGlSetpReached());
 
 	// RESET STATE COUNTER
 	if(state != stateOld)

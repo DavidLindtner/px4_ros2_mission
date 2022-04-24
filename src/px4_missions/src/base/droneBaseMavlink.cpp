@@ -13,15 +13,30 @@ DroneMavlink::DroneMavlink() : Node("DroneMavlink")
 											currentState = *msg;
 										});
 
-	// NOT YET WORKING
+	_alt_sub = this->create_subscription<mavros_msgs::msg::Altitude>(
+										"/mavros/altitude", 
+										rclcpp::SensorDataQoS(), 
+										[this](mavros_msgs::msg::Altitude::ConstSharedPtr msg) {
+											altitude = msg->amsl;
+										});
+
+
 	_gps_sub = this->create_subscription<sensor_msgs::msg::NavSatFix>(
 										"/mavros/global_position/global", 
-										1, 
+										rclcpp::SensorDataQoS(), 
 										[this](sensor_msgs::msg::NavSatFix::ConstSharedPtr msg) {
-											std::cout << "sme tu" << std::endl;
 											gpsPos = *msg;
-											std::cout << msg->latitude << std::endl;
 										});
+
+
+	_loc_pose_sub = this->create_subscription<geometry_msgs::msg::PoseStamped>(
+										"/mavros/local_position/pose", 
+										rclcpp::SensorDataQoS(),
+										[this](geometry_msgs::msg::PoseStamped::ConstSharedPtr msg) {
+											locPos = *msg;
+										});
+
+
 
 	_cmd_cli = this->create_client<mavros_msgs::srv::CommandBool>("/mavros/cmd/arming");
 	_mode_cli = this->create_client<mavros_msgs::srv::SetMode>("/mavros/set_mode");
@@ -37,6 +52,9 @@ void DroneMavlink::preFlightCheck(float takeOffAlt)
 
 	changeParam("COM_RCL_EXCEPT", 2, 4, 0);
 	RCLCPP_INFO(this->get_logger(), "RC loss exceptions is set");
+
+	changeParam("COM_OBL_ACT", 2, 1, 0);
+	RCLCPP_INFO(this->get_logger(), "Failsafe action after Offboard mode lost");
 
 	preFlightCheckOK = true;
 }
@@ -235,5 +253,29 @@ void DroneMavlink::publish_traj_setp_geo(float lat, float lon, float alt)
     msg.pose.position.longitude = lon;
     msg.pose.position.altitude = alt;
 	_geo_setp_pub->publish(msg);
+
+	lastGlobalSetpoint.lat = lat;
+	lastGlobalSetpoint.lon = lon;
+	lastGlobalSetpoint.alt = alt;
 }
 
+
+bool DroneMavlink::isGlSetpReached()
+{
+	float latSetpRad = 3.1415 * lastGlobalSetpoint.lat / 180;
+	float latActRad = 3.1415 * gpsPos.latitude / 180;
+
+	float latDiff = 3.1415 * (lastGlobalSetpoint.lat - gpsPos.latitude) / 180;
+	float lonDiff = 3.1415 * (lastGlobalSetpoint.lon - gpsPos.longitude) / 180;
+
+    double  a = sin(latDiff/2) * sin(latDiff/2) + cos(latSetpRad) * cos(latActRad) * sin(lonDiff/2) * sin(lonDiff/2);
+    double  c = 2 * atan2(sqrt(a), sqrt(1-a));
+    double  distance = 6372797.56085 * c;
+
+	distance += abs(lastGlobalSetpoint.alt - altitude);
+   
+	if(distance <= 0.5)
+		return true;
+	else
+		return false;
+}
