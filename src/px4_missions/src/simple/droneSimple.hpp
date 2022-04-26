@@ -11,7 +11,8 @@ public:
 
 /* STATE:
 00 -> Wait 1 sec
-10 -> PreFlightCheck
+10 -> Parameters pull
+11 -> PreFlightCheck
 20 -> Wait for TakeOff start
 30 -> TakeOff mode set
 40 -> Arm command send

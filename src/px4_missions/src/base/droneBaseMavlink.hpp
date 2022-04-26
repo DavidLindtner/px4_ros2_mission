@@ -12,6 +12,7 @@
 #include <mavros_msgs/srv/command_bool.hpp>
 #include <mavros_msgs/srv/set_mode.hpp>
 #include <mavros_msgs/srv/param_set_v2.hpp>
+#include <mavros_msgs/srv/param_pull.hpp>
 
 #include <rclcpp/rclcpp.hpp>
 #include <stdint.h>
@@ -47,11 +48,15 @@ public:
 
 
 	bool preFlightCheckOK = false;
+	bool paramPullOk = false;
+
+	std::string vehicleName;
 
     void arm();
 	void disarm();
     void setFlightMode(FlightMode mode);
-    void preFlightCheck(float takeOffAlt);
+    void preFlightCheck(float takeOffAlt, float maxHorSpeed);
+    void pullParam();
 
 	void publish_traj_setp_position(float x, float y, float z, float yaw);
 	void publish_traj_setp_speed(float vx, float vy, float vz, float yawspeed);
@@ -77,8 +82,10 @@ private:
 	rclcpp::Client<mavros_msgs::srv::CommandBool>::SharedPtr _cmd_cli;
 	rclcpp::Client<mavros_msgs::srv::SetMode>::SharedPtr _mode_cli;
 	rclcpp::Client<mavros_msgs::srv::ParamSetV2>::SharedPtr _param_cli;
+	rclcpp::Client<mavros_msgs::srv::ParamPull>::SharedPtr _param_req_cli;
 
 	std::string _flightMode;
+	int _noChangedParams = 0;
 };
 
 

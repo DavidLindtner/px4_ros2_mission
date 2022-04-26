@@ -2,19 +2,22 @@
 
 DroneMavlink::DroneMavlink() : Node("DroneMavlink")
 {
-	_pos_setp_pub = this->create_publisher<geometry_msgs::msg::PoseStamped>("/mavros/setpoint_position/local", 1);
-	_vel_setp_pub = this->create_publisher<geometry_msgs::msg::TwistStamped>("/mavros/setpoint_velocity/cmd_vel", 1);
-	_geo_setp_pub = this->create_publisher<geographic_msgs::msg::GeoPoseStamped>("/mavros/setpoint_position/global", 1);
+	this->declare_parameter("vehicleName", "");
+	vehicleName = this->get_parameter("vehicleName").as_string();
+
+	_pos_setp_pub = this->create_publisher<geometry_msgs::msg::PoseStamped>(vehicleName + "/mavros/setpoint_position/local", 1);
+	_vel_setp_pub = this->create_publisher<geometry_msgs::msg::TwistStamped>(vehicleName + "/mavros/setpoint_velocity/cmd_vel", 1);
+	_geo_setp_pub = this->create_publisher<geographic_msgs::msg::GeoPoseStamped>(vehicleName + "/mavros/setpoint_position/global", 1);
 
 	_state_sub = this->create_subscription<mavros_msgs::msg::State>(
-										"/mavros/state", 
+										vehicleName + "/mavros/state", 
 										1, 
 										[this](mavros_msgs::msg::State::ConstSharedPtr msg) {
 											currentState = *msg;
 										});
 
 	_alt_sub = this->create_subscription<mavros_msgs::msg::Altitude>(
-										"/mavros/altitude", 
+										vehicleName + "/mavros/altitude", 
 										rclcpp::SensorDataQoS(), 
 										[this](mavros_msgs::msg::Altitude::ConstSharedPtr msg) {
 											altitude = msg->amsl;
@@ -22,7 +25,7 @@ DroneMavlink::DroneMavlink() : Node("DroneMavlink")
 
 
 	_gps_sub = this->create_subscription<sensor_msgs::msg::NavSatFix>(
-										"/mavros/global_position/global", 
+										vehicleName + "/mavros/global_position/raw/fix", 
 										rclcpp::SensorDataQoS(), 
 										[this](sensor_msgs::msg::NavSatFix::ConstSharedPtr msg) {
 											gpsPos = *msg;
@@ -30,7 +33,7 @@ DroneMavlink::DroneMavlink() : Node("DroneMavlink")
 
 
 	_loc_pose_sub = this->create_subscription<geometry_msgs::msg::PoseStamped>(
-										"/mavros/local_position/pose", 
+										vehicleName + "/mavros/local_position/pose", 
 										rclcpp::SensorDataQoS(),
 										[this](geometry_msgs::msg::PoseStamped::ConstSharedPtr msg) {
 											locPos = *msg;
@@ -38,14 +41,42 @@ DroneMavlink::DroneMavlink() : Node("DroneMavlink")
 
 
 
-	_cmd_cli = this->create_client<mavros_msgs::srv::CommandBool>("/mavros/cmd/arming");
-	_mode_cli = this->create_client<mavros_msgs::srv::SetMode>("/mavros/set_mode");
-	_param_cli = this->create_client<mavros_msgs::srv::ParamSetV2>("/mavros/param/set");
+	_cmd_cli = this->create_client<mavros_msgs::srv::CommandBool>(vehicleName + "/mavros/cmd/arming");
+	_mode_cli = this->create_client<mavros_msgs::srv::SetMode>(vehicleName + "/mavros/set_mode");
+	_param_cli = this->create_client<mavros_msgs::srv::ParamSetV2>(vehicleName + "/mavros/param/set");
+	_param_req_cli = this->create_client<mavros_msgs::srv::ParamPull>(vehicleName + "/mavros/param/pull");
 
 }
 
+void DroneMavlink::pullParam()
+{
+	// check if services exist
+	while (!_param_req_cli->wait_for_service(1s))
+	{
+		if (!rclcpp::ok())
+		{
+			RCLCPP_ERROR(this->get_logger(), "Interrupted while waiting for the service. Exiting.");
+			exit(1);
+		}
+		RCLCPP_INFO(this->get_logger(), "service not available, waiting again...");
+	}
+  	auto request = std::make_shared<mavros_msgs::srv::ParamPull::Request>();
+	request->force_pull = false;
+	
+	// wait for result
+    using ServiceResponseFuture = rclcpp::Client<mavros_msgs::srv::ParamPull>::SharedFuture;
+    auto response_received_callback = [this](ServiceResponseFuture future)
+	{
+		auto result = future.get();
+		paramPullOk = result->success;
+		if(!paramPullOk)
+			RCLCPP_ERROR(this->get_logger(), "PARAMETERS WERE NOT PULLED");
+    };
+    auto future_result = _param_req_cli->async_send_request(request, response_received_callback);
+}
 
-void DroneMavlink::preFlightCheck(float takeOffAlt)
+
+void DroneMavlink::preFlightCheck(float takeOffAlt, float maxHorSpeed)
 {
 	changeParam("MIS_TAKEOFF_ALT", 3, 0, takeOffAlt);
 	RCLCPP_INFO(this->get_logger(), "TakeOff height set to %f", takeOffAlt);
@@ -56,7 +87,9 @@ void DroneMavlink::preFlightCheck(float takeOffAlt)
 	changeParam("COM_OBL_ACT", 2, 1, 0);
 	RCLCPP_INFO(this->get_logger(), "Failsafe action after Offboard mode lost");
 
-	preFlightCheckOK = true;
+	// max 20 m/s
+	changeParam("MPC_XY_VEL_MAX", 3, 0, maxHorSpeed);
+	RCLCPP_INFO(this->get_logger(), "Horizontal speed set to %f", maxHorSpeed);
 }
 
 
@@ -87,6 +120,15 @@ void DroneMavlink::changeParam(std::string name, int type, int intVal, float flo
 		auto result = future.get();
 		if(!result->success)
 			RCLCPP_ERROR(this->get_logger(), "ERROR SETTING PARAMETER");
+
+		if(result->success)
+			_noChangedParams++;
+
+		// check, if all parameters were changed and if we have gps fix
+		if(gpsPos.status.status >= 0 && _noChangedParams == 4)
+			preFlightCheckOK = true;
+		else
+			preFlightCheckOK = false;
     };
     auto future_result = _param_cli->async_send_request(request, response_received_callback);
 }

@@ -18,6 +18,12 @@ void DroneSimple::flight_mode_timer_callback()
 			break;
 
 		case 10:
+			// Parameters pull
+			if(this->paramPullOk)
+				state = 11;
+			break;
+
+		case 11:
 			// PreFlightCheck
 			if(this->preFlightCheckOK)
 				state = 20;
@@ -55,7 +61,7 @@ void DroneSimple::flight_mode_timer_callback()
 
 		case 70:
 			// Wait for data
-			if(stateCounter == 500)
+			if(stateCounter == 100)
 				state = 80;
 			break;
 
@@ -77,9 +83,15 @@ void DroneSimple::flight_mode_timer_callback()
 			break;
 
 		case 10:
+			// Parameters pull
+			if(stateCounter == 1)
+				this->pullParam();
+			break;
+
+		case 11:
 			// PreFlightCheck
 			if(stateCounter == 1)
-				this->preFlightCheck(10.0);
+				this->preFlightCheck(10.0, 10.0);
 			break;
 
 		case 20:
