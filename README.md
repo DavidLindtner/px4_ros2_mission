@@ -38,8 +38,22 @@ ros2 run px4_missions simpleMission
 ```bash
 ros2 launch px4_missions supervised_launch.py
 ```
+## Run simulation with multiple wehicles with MAVLink
 
-## Run simulation with multiple wehicles - NOT YET NOT WORKING
+To start multiple wehicle simulation (multiple instances of PX4 firmware) with gazebo simulator run command in PX4-Autopilot directory:
+```bash
+./Tools/gazebo_sitl_multiple_run.sh -t px4_sitl_default -m iris -n 3
+```
+
+Then run ROS 2 launch file which launchs:
+* 3x mavros
+* 3x simpleMission ROS 2 node
+
+```bash
+ros2 launch px4_missions multipleDrone_launch.py 
+```
+
+## Run simulation with multiple wehicles with RTPS - NOT YET NOT WORKING
 
 > **ISSUES:**
 >

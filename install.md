@@ -5,7 +5,8 @@ In order to simulate drone missions with PX4 & ROS2 you need to perform several 
   * [Download QGroundControl](#download-qgroundcontrol)
   * [Install ROS 2 Foxy](#install-ros-2-foxy)
   * [Download PX4 firmware](#download-px4-firmware)
-  * [Install dependencies for PX4 - ROS 2 communication bridge](#px4-ros-2-bridge)
+  * [Install dependencies for PX4 - ROS 2 communication bridge](#px4-ros-2-communication-bridge)
+  * [MAVLink](#mavlink)
   * [Build ROS 2 workspace](#build-ros-2-workspace)
 
 ## Download QGroundControl
@@ -151,6 +152,27 @@ git clone --recursive https://github.com/eProsima/Fast-DDS-Gen.git -b v1.0.4 ~/F
     && cd ~/Fast-RTPS-Gen \
     && gradle assemble \
     && sudo env "PATH=$PATH" gradle install
+```
+## MAVLink
+
+First you need to install Mavros for ROS-Foxy
+
+```bash
+sudo apt install ros-foxy-mavros
+```
+
+Download installation script for geographic dataset, run the script and remove it
+
+```bash
+wget https://raw.githubusercontent.com/mavlink/mavros/ros2/mavros/scripts/install_geographiclib_datasets.sh
+sudo bash install_geographiclib_datasets.sh
+rm install_geographiclib_datasets.sh
+```
+
+Then install python dependencies:
+
+```bash
+sudo apt install python3-lxml libxml2-utils
 ```
 
 ## Build ROS 2 workspace
