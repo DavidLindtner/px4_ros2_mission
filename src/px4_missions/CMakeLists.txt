@@ -59,6 +59,21 @@ install(TARGETS missionSupervisor
 
 
 
+# objctTracking
+add_executable(objectTracking src/objectTrackingMission.cpp src/objectTracking/objectTrackingDrone.cpp src/base/droneBaseRTPS.cpp src/base/droneBaseMavlink.cpp)
+ament_target_dependencies(objectTracking rclcpp px4_msgs geometry_msgs mavros_msgs geographic_msgs sensor_msgs)
+
+target_include_directories(objectTracking PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>)
+
+install(TARGETS objectTracking
+  DESTINATION lib/${PROJECT_NAME})
+
+
+
+
+
 # supervisedMission
 add_executable(supervisedMission src/supervisedMission.cpp src/supervised/droneSupervised.cpp src/base/droneBaseRTPS.cpp src/base/droneBaseMavlink.cpp)
 ament_target_dependencies(supervisedMission rclcpp px4_msgs geometry_msgs mavros_msgs geographic_msgs sensor_msgs)

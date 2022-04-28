@@ -315,6 +315,8 @@ bool DroneMavlink::isGlSetpReached()
     double  distance = 6372797.56085 * c;
 
 	distance += abs(lastGlobalSetpoint.alt - altitude);
+
+	//std::cout << distance << std::endl;
    
 	if(distance <= 0.5)
 		return true;
