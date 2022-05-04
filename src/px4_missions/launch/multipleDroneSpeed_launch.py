@@ -28,7 +28,7 @@ def generate_launch_description():
         package = 'px4_missions',
         executable = 'missionSupervisor',
         namespace = 'vhcl1',
-        parameters = [os.path.join(get_package_share_directory('px4_missions'), 'params', 'velMission1.yaml')]
+        parameters = [os.path.join(get_package_share_directory('px4_missions'), 'params', 'velMission2.yaml')]
     )
 
 
@@ -82,7 +82,7 @@ def generate_launch_description():
         package = 'px4_missions',
         executable = 'missionSupervisor',
         namespace = 'vhcl3',
-        parameters = [os.path.join(get_package_share_directory('px4_missions'), 'params', 'velMission3.yaml')]
+        parameters = [os.path.join(get_package_share_directory('px4_missions'), 'params', 'velMission2.yaml')]
     )
 
 

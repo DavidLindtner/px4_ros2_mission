@@ -143,7 +143,7 @@ void DroneSimple::flight_mode_timer_callback()
 
 	// OFFBOARD SETPOINTS SEND
 	if(state <= 70)
-		this->publish_traj_setp_geo(holdLat, holdLon, holdAlt, true);
+		this->publish_traj_setp_geo(holdLat, holdLon, holdAlt, false);
 	else if(state >= 80)
 		this->publish_traj_setp_geo(49.228754, 16.572077, 300, true);
 

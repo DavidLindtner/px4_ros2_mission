@@ -136,7 +136,7 @@ void DroneSupervised::timerCallback()
 		case 11:
 			// PreFlightCheck
 			if(stateCounter == 1)
-				this->preFlightCheck(takeOffAlt, 12.0);
+				this->preFlightCheck(takeOffAlt, 6.0);
 			break;
 
 		case 20:
