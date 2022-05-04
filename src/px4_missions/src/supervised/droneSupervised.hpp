@@ -4,19 +4,30 @@
 #include "../base/droneBaseRTPS.hpp"
 #include "../base/droneBaseMavlink.hpp"
 
-#include <geometry_msgs/msg/quaternion.hpp>
+#include <geometry_msgs/msg/pose.hpp>
+#include <geometry_msgs/msg/twist.hpp>
 
-class DroneSupervised : public DroneRTPS
+#include <tf2/LinearMath/Quaternion.h>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
+
+class DroneSupervised : public DroneMavlink
 {
 public:
 	DroneSupervised();
 
+	int state = 0;
+	int stateOld = 0;
+	uint64_t stateCounter = 0;
+	uint64_t programCounter = 0;
+
+	float takeOffAlt = 10.0;
+
 private:
 
-	std::atomic<float> _x;
-	std::atomic<float> _y;
-	std::atomic<float> _z;
-	std::atomic<float> _yaw;
+	float _x;
+	float _y;
+	float _z;
+	float _yaw;
 
 	bool _relPosPub_Active = false;
 	bool _velPub_Active = false;
@@ -24,8 +35,12 @@ private:
 	bool _resPosPub_stopped = false;
 	bool _velPub_stopped = false;
 
-	rclcpp::Subscription<geometry_msgs::msg::Quaternion>::SharedPtr _quat_pos_sub;
-	rclcpp::Subscription<geometry_msgs::msg::Quaternion>::SharedPtr _quat_vel_sub;
+	float holdLat;
+	float holdLon;
+	float holdAlt;
+	
+	rclcpp::Subscription<geometry_msgs::msg::Pose>::SharedPtr _pos_sub;
+	rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr _vel_sub;
 
 	void timerCallback();
 
@@ -35,7 +50,6 @@ private:
 	rclcpp::TimerBase::SharedPtr _timer;
 	rclcpp::TimerBase::SharedPtr _timerActive1;
 	rclcpp::TimerBase::SharedPtr _timerActive2;
-	uint64_t _offboard_setpoint_counter;
 };
 
 

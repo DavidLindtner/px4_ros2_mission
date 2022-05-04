@@ -16,7 +16,7 @@ def generate_launch_description():
  
     node2=Node(
         package = 'px4_missions',
-        executable = 'simpleMission',
+        executable = 'objectTracking',
         name = 'drone1',
         parameters=[
             {"vehicleName": "/vhcl1"},
@@ -36,7 +36,7 @@ def generate_launch_description():
 
     node4=Node(
         package = 'px4_missions',
-        executable = 'simpleMission',
+        executable = 'objectTracking',
         name = 'drone2',
         parameters=[
             {"vehicleName": "/vhcl2"},
@@ -56,7 +56,7 @@ def generate_launch_description():
 
     node6=Node(
         package = 'px4_missions',
-        executable = 'simpleMission',
+        executable = 'objectTracking',
         name = 'drone3',
         parameters=[
             {"vehicleName": "/vhcl3"},

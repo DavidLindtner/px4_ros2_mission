@@ -30,6 +30,8 @@ public:
 	uint64_t stateCounter = 0;
 	uint64_t programCounter = 0;
 
+	float takeOffAlt = 10.0;
+
 	float holdLat;
 	float holdLon;
 	float holdAlt;

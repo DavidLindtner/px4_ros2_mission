@@ -1,3 +1,5 @@
+import os
+from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch_ros.actions import Node
 
@@ -13,18 +15,25 @@ def generate_launch_description():
             {"tgt_system": 1}
         ]
     )
- 
     node2=Node(
         package = 'px4_missions',
-        executable = 'simpleMission',
+        executable = 'supervisedMission',
         name = 'drone1',
         parameters=[
             {"vehicleName": "/vhcl1"},
             {"takeOffHeight": 10.0}
         ]
     )
-
     node3=Node(
+        package = 'px4_missions',
+        executable = 'missionSupervisor',
+        namespace = 'vhcl1',
+        parameters = [os.path.join(get_package_share_directory('px4_missions'), 'params', 'velMission1.yaml')]
+    )
+
+
+
+    node4=Node(
         package = 'mavros',
         executable = 'mavros_node',
         namespace = 'vhcl2/mavros',
@@ -33,18 +42,25 @@ def generate_launch_description():
             {"tgt_system": 2}
         ]
     )
-
-    node4=Node(
+    node5=Node(
         package = 'px4_missions',
-        executable = 'simpleMission',
+        executable = 'supervisedMission',
         name = 'drone2',
         parameters=[
             {"vehicleName": "/vhcl2"},
             {"takeOffHeight": 12.5}
         ]
     )
+    node6=Node(
+        package = 'px4_missions',
+        executable = 'missionSupervisor',
+        namespace = 'vhcl2',
+        parameters = [os.path.join(get_package_share_directory('px4_missions'), 'params', 'velMission2.yaml')]
+    )
 
-    node5=Node(
+
+
+    node7=Node(
         package = 'mavros',
         executable = 'mavros_node',
         namespace = 'vhcl3/mavros',
@@ -53,16 +69,22 @@ def generate_launch_description():
             {"tgt_system": 3}
         ]
     )
-
-    node6=Node(
+    node8=Node(
         package = 'px4_missions',
-        executable = 'simpleMission',
+        executable = 'supervisedMission',
         name = 'drone3',
         parameters=[
             {"vehicleName": "/vhcl3"},
             {"takeOffHeight": 15.0}
         ]
     )
+    node9=Node(
+        package = 'px4_missions',
+        executable = 'missionSupervisor',
+        namespace = 'vhcl3',
+        parameters = [os.path.join(get_package_share_directory('px4_missions'), 'params', 'velMission3.yaml')]
+    )
+
 
 
     ld.add_action(node1)
@@ -71,5 +93,8 @@ def generate_launch_description():
     ld.add_action(node4)
     ld.add_action(node5)
     ld.add_action(node6)
+    ld.add_action(node7)
+    ld.add_action(node8)
+    ld.add_action(node9)
     return ld
 

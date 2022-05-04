@@ -1,5 +1,9 @@
 
-#include <geometry_msgs/msg/quaternion.hpp>
+#include <geometry_msgs/msg/pose.hpp>
+#include <geometry_msgs/msg/twist.hpp>
+
+#include <tf2/LinearMath/Quaternion.h>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 
 #include <rclcpp/rclcpp.hpp>
 #include <chrono>
@@ -42,10 +46,10 @@ public:
 		switch(_offboardMode)
 		{
 			case 1:
-				_quaternion_pub = this->create_publisher<geometry_msgs::msg::Quaternion>("PositionQuat", 10);
+				_pose_pub = this->create_publisher<geometry_msgs::msg::Pose>("PositionSetp", 1);
 				break;
 			case 2:
-				_quaternion_pub = this->create_publisher<geometry_msgs::msg::Quaternion>("VelocityQuat", 10);
+				_vel_pub = this->create_publisher<geometry_msgs::msg::Twist>("VelocitySetp", 1);
 				break;
 			default:
 				rclcpp::shutdown();
@@ -56,15 +60,28 @@ public:
 	}
 
 private:
-
 	void cyclicTimer()
 	{
-		auto message = geometry_msgs::msg::Quaternion();
-		message.x = _x[_sample_counter];
-		message.y = _y[_sample_counter];
-		message.z = _z[_sample_counter];
-		message.w = _yaw[_sample_counter];
-		_quaternion_pub->publish(message);
+		if(_offboardMode == 1)
+		{
+			auto messagePose = geometry_msgs::msg::Pose();
+			messagePose.position.x = _x[_sample_counter];
+			messagePose.position.y = _y[_sample_counter];
+			messagePose.position.z = _z[_sample_counter];
+			tf2::Quaternion q;
+			q.setRPY(0, 0, _yaw[_sample_counter]);
+			messagePose.orientation = tf2::toMsg(q);
+			_pose_pub->publish(messagePose);
+		}
+		else
+		{
+			auto messageVel = geometry_msgs::msg::Twist();
+			messageVel.linear.x = _x[_sample_counter];
+			messageVel.linear.y = _y[_sample_counter];
+			messageVel.linear.z = _z[_sample_counter];
+			messageVel.angular.z = _yaw[_sample_counter];
+			_vel_pub->publish(messageVel);
+		}
 
 		if(_cycle_time >= _absolute_time)
 		{
@@ -91,7 +108,8 @@ private:
 	int _sample_counter = 0;
 	int _dataLength = 0;
 
-	rclcpp::Publisher<geometry_msgs::msg::Quaternion>::SharedPtr _quaternion_pub;
+	rclcpp::Publisher<geometry_msgs::msg::Pose>::SharedPtr _pose_pub;
+	rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr _vel_pub;
 
 	rclcpp::TimerBase::SharedPtr _timer;
 };

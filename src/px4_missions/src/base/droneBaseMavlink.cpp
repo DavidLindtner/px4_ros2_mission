@@ -273,7 +273,9 @@ void DroneMavlink::publish_traj_setp_position(float x, float y, float z, float y
     msg.pose.position.x = x;
     msg.pose.position.y = y;
     msg.pose.position.z = z;
-	msg.pose.orientation.z = yaw;
+	tf2::Quaternion q;
+	q.setRPY(0, 0, yaw);
+	msg.pose.orientation = tf2::toMsg(q);
 	_pos_setp_pub->publish(msg);
 }
 
@@ -288,12 +290,22 @@ void DroneMavlink::publish_traj_setp_speed(float vx, float vy, float vz, float y
 	_vel_setp_pub->publish(msg);
 }
 
-void DroneMavlink::publish_traj_setp_geo(float lat, float lon, float alt)
+void DroneMavlink::publish_traj_setp_geo(float lat, float lon, float alt, bool heading)
 {
 	geographic_msgs::msg::GeoPoseStamped msg;
     msg.pose.position.latitude = lat;
     msg.pose.position.longitude = lon;
     msg.pose.position.altitude = alt;
+
+	tf2::Quaternion q;
+
+	if(heading)
+		q.setRPY(0, 0, azimutToSetp());
+	else
+		q.setRPY(0, 0, 0);
+
+	msg.pose.orientation = tf2::toMsg(q);
+
 	_geo_setp_pub->publish(msg);
 
 	lastGlobalSetpoint.lat = lat;
@@ -322,4 +334,17 @@ bool DroneMavlink::isGlSetpReached()
 		return true;
 	else
 		return false;
+}
+
+float DroneMavlink::azimutToSetp()
+{
+	float latSetpRad = 3.1415 * lastGlobalSetpoint.lat / 180;
+	float latActRad = 3.1415 * gpsPos.latitude / 180;
+
+	float lonDiff = 3.1415 * (lastGlobalSetpoint.lon - gpsPos.longitude) / 180;
+
+	float y = sin(lonDiff) * cos(latSetpRad);
+	float x = cos(latActRad)*sin(latSetpRad) - sin(latActRad)*cos(latSetpRad)*cos(lonDiff);
+	float th = atan2(x,y);
+	return th;
 }

@@ -14,6 +14,9 @@
 #include <mavros_msgs/srv/param_set_v2.hpp>
 #include <mavros_msgs/srv/param_pull.hpp>
 
+#include <tf2/LinearMath/Quaternion.h>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
+
 #include <rclcpp/rclcpp.hpp>
 #include <stdint.h>
 
@@ -60,9 +63,10 @@ public:
 
 	void publish_traj_setp_position(float x, float y, float z, float yaw);
 	void publish_traj_setp_speed(float vx, float vy, float vz, float yawspeed);
-	void publish_traj_setp_geo(float lat, float lon, float alt);
+	void publish_traj_setp_geo(float lat, float lon, float alt, bool heading);
 
 	bool isGlSetpReached();
+	float azimutToSetp();
 
 private:
 	void changeParam(std::string name, int type, int intVal, float floatVal);

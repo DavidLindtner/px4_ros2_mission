@@ -25,13 +25,15 @@ find_package(nav_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(geographic_msgs REQUIRED)
-
+find_package(tf2 REQUIRED)
+find_package(tf2_ros REQUIRED)
+find_package(tf2_geometry_msgs REQUIRED)
 
 
 
 # simpleMission
 add_executable(simpleMission src/simpleMission.cpp src/simple/droneSimple.cpp src/base/droneBaseRTPS.cpp src/base/droneBaseMavlink.cpp)
-ament_target_dependencies(simpleMission rclcpp px4_msgs mavros_msgs geometry_msgs geographic_msgs sensor_msgs)
+ament_target_dependencies(simpleMission rclcpp px4_msgs mavros_msgs geometry_msgs geographic_msgs sensor_msgs tf2 tf2_ros tf2_geometry_msgs)
 
 target_include_directories(simpleMission PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
@@ -46,7 +48,7 @@ install(TARGETS simpleMission
 
 # missionSupervisor
 add_executable(missionSupervisor src/missionSupervisor.cpp)
-ament_target_dependencies(missionSupervisor rclcpp geometry_msgs)
+ament_target_dependencies(missionSupervisor rclcpp geometry_msgs tf2 tf2_ros tf2_geometry_msgs)
 
 target_include_directories(missionSupervisor PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
@@ -61,7 +63,7 @@ install(TARGETS missionSupervisor
 
 # objctTracking
 add_executable(objectTracking src/objectTrackingMission.cpp src/objectTracking/objectTrackingDrone.cpp src/base/droneBaseRTPS.cpp src/base/droneBaseMavlink.cpp)
-ament_target_dependencies(objectTracking rclcpp px4_msgs geometry_msgs mavros_msgs geographic_msgs sensor_msgs)
+ament_target_dependencies(objectTracking rclcpp px4_msgs geometry_msgs mavros_msgs geographic_msgs sensor_msgs tf2 tf2_ros tf2_geometry_msgs)
 
 target_include_directories(objectTracking PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
@@ -76,7 +78,7 @@ install(TARGETS objectTracking
 
 # supervisedMission
 add_executable(supervisedMission src/supervisedMission.cpp src/supervised/droneSupervised.cpp src/base/droneBaseRTPS.cpp src/base/droneBaseMavlink.cpp)
-ament_target_dependencies(supervisedMission rclcpp px4_msgs geometry_msgs mavros_msgs geographic_msgs sensor_msgs)
+ament_target_dependencies(supervisedMission rclcpp px4_msgs geometry_msgs mavros_msgs geographic_msgs sensor_msgs tf2 tf2_ros tf2_geometry_msgs)
 
 target_include_directories(supervisedMission PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>

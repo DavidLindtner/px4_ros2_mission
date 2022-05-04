@@ -29,10 +29,11 @@ sudo apt install python3-colcon-common-extensions
 sudo apt install ros-foxy-eigen3-cmake-module
 ```
 
-1. Some Python dependencies must also be installed (using pip or apt):
+4. Some Python dependencies must also be installed (using pip or apt):
 
 ```bash
 sudo pip3 install -U empy pyros-genmsg setuptools
+pip3 install transforms3d
 ```
 
 ## Download PX4 firmware

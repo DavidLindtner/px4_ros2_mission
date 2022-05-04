@@ -2,6 +2,9 @@
 
 ObjectTrackingDrone::ObjectTrackingDrone() : DroneMavlink()
 {
+	this->declare_parameter("takeOffHeight", 10.0);
+	takeOffAlt = this->get_parameter("takeOffHeight").as_double();
+
 	_point_sub = this->create_subscription<geometry_msgs::msg::Point>(
 										"/estimated_source_location", 
 										1, 
@@ -113,7 +116,7 @@ void ObjectTrackingDrone::mainLoopCallback()
 		case 11:
 			// PreFlightCheck
 			if(stateCounter == 1)
-				this->preFlightCheck(10.0, 0.6);
+				this->preFlightCheck(takeOffAlt, 0.6);
 			break;
 
 		case 20:
@@ -181,11 +184,11 @@ void ObjectTrackingDrone::mainLoopCallback()
 
 	// OFFBOARD SETPOINTS SEND
 	if(state <= 70)
-		this->publish_traj_setp_geo(holdLat, holdLon, holdAlt);
+		this->publish_traj_setp_geo(holdLat, holdLon, holdAlt, false);
 	else if (state == 80)
-		this->publish_traj_setp_geo(setpLat.load(), setpLon.load(), holdAlt);
+		this->publish_traj_setp_geo(setpLat.load(), setpLon.load(), holdAlt, true);
 	else if (state >= 90)
-		this->publish_traj_setp_geo(holdLat, holdLon, holdAlt);
+		this->publish_traj_setp_geo(holdLat, holdLon, holdAlt, false);
 
 	//this->isGlSetpReached();
 
