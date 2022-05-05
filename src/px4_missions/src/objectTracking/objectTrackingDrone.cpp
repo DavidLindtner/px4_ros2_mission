@@ -2,15 +2,12 @@
 
 ObjectTrackingDrone::ObjectTrackingDrone() : DroneMavlink()
 {
-	this->declare_parameter("takeOffHeight", 10.0);
-	takeOffAlt = this->get_parameter("takeOffHeight").as_double();
-
-	_point_sub = this->create_subscription<geometry_msgs::msg::Point>(
+	_geo_point_sub = this->create_subscription<geographic_msgs::msg::GeoPoint>(
 										"/estimated_source_location", 
 										1, 
-										[this](geometry_msgs::msg::Point::ConstSharedPtr msg) {
-											setpLat.store(msg->y);
-											setpLon.store(msg->x);
+										[this](geographic_msgs::msg::GeoPoint::ConstSharedPtr msg) {
+											setpLat.store(msg->latitude);
+											setpLon.store(msg->longitude);
 
 											_point_sub_started = true;
 											_timerActive->cancel();
@@ -116,7 +113,7 @@ void ObjectTrackingDrone::mainLoopCallback()
 		case 11:
 			// PreFlightCheck
 			if(stateCounter == 1)
-				this->preFlightCheck(takeOffAlt, 0.6);
+				this->preFlightCheck();
 			break;
 
 		case 20:

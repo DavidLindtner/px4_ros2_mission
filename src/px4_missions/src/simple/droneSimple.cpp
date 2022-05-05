@@ -91,7 +91,7 @@ void DroneSimple::flight_mode_timer_callback()
 		case 11:
 			// PreFlightCheck
 			if(stateCounter == 1)
-				this->preFlightCheck(10.0, 10.0);
+				this->preFlightCheck();
 			break;
 
 		case 20:

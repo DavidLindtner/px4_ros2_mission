@@ -4,7 +4,7 @@
 #include "../base/droneBaseRTPS.hpp"
 #include "../base/droneBaseMavlink.hpp"
 
-#include <geometry_msgs/msg/point.hpp>
+#include <geographic_msgs/msg/geo_point.hpp>
 
 class ObjectTrackingDrone : public DroneMavlink
 {
@@ -29,9 +29,7 @@ public:
 	int stateOld = 0;
 	uint64_t stateCounter = 0;
 	uint64_t programCounter = 0;
-
-	float takeOffAlt = 10.0;
-
+	
 	float holdLat;
 	float holdLon;
 	float holdAlt;
@@ -46,7 +44,7 @@ private:
 	rclcpp::TimerBase::SharedPtr _timer;
 	rclcpp::TimerBase::SharedPtr _timerActive;
 
-	rclcpp::Subscription<geometry_msgs::msg::Point>::SharedPtr _point_sub;
+	rclcpp::Subscription<geographic_msgs::msg::GeoPoint>::SharedPtr _geo_point_sub;
 
 	bool _point_sub_stopped = false;
 	bool _point_sub_started = false;

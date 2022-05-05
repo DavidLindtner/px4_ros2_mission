@@ -6,7 +6,7 @@ DroneSupervised::DroneSupervised() : DroneMavlink()
 	takeOffAlt = this->get_parameter("takeOffHeight").as_double();
 
 	_pos_sub = this->create_subscription<geometry_msgs::msg::Pose>(
-									vehicleName + "/PositionSetp",
+									param.vehicleName + "/PositionSetp",
 									1,
 									[this](const geometry_msgs::msg::Pose::ConstSharedPtr msg){
 										_x = msg->position.x;
@@ -24,7 +24,7 @@ DroneSupervised::DroneSupervised() : DroneMavlink()
 									});
 
 	_vel_sub = this->create_subscription<geometry_msgs::msg::Twist>(
-									vehicleName + "/VelocitySetp",
+									param.vehicleName + "/VelocitySetp",
 									1,
 									[this](const geometry_msgs::msg::Twist::ConstSharedPtr msg){
 										_x = msg->linear.x;
@@ -136,7 +136,7 @@ void DroneSupervised::timerCallback()
 		case 11:
 			// PreFlightCheck
 			if(stateCounter == 1)
-				this->preFlightCheck(takeOffAlt, 6.0);
+				this->preFlightCheck();
 			break;
 
 		case 20:

@@ -44,6 +44,16 @@ public:
 		float alt;
 	}lastGlobalSetpoint;
 
+	struct
+	{
+		std::string vehicleName = "";
+		float takeOffHeight = 10.0;
+		float xyMaxVelocity = 10.0;
+		float setpReachedDist = 0.5;
+		float disableRotationDist = 1.0;
+	}param;
+	
+
 	mavros_msgs::msg::State currentState;
 	sensor_msgs::msg::NavSatFix gpsPos;
 	geometry_msgs::msg::PoseStamped locPos;
@@ -58,7 +68,7 @@ public:
     void arm();
 	void disarm();
     void setFlightMode(FlightMode mode);
-    void preFlightCheck(float takeOffAlt, float maxHorSpeed);
+    void preFlightCheck();
     void pullParam();
 
 	void publish_traj_setp_position(float x, float y, float z, float yaw);
@@ -66,6 +76,8 @@ public:
 	void publish_traj_setp_geo(float lat, float lon, float alt, bool heading);
 
 	bool isGlSetpReached();
+	bool isRotEnable();
+	float distToSetp();
 	float azimutToSetp();
 
 private:
@@ -89,7 +101,10 @@ private:
 	rclcpp::Client<mavros_msgs::srv::ParamPull>::SharedPtr _param_req_cli;
 
 	std::string _flightMode;
-	int _noChangedParams = 0;
+
+	int _paramsToChange = 0;
+	int _changedParams = 0;
+	float _lastAzimut = 0;
 };
 
 

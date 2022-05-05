@@ -20,7 +20,8 @@ def generate_launch_description():
         name = 'drone1',
         parameters=[
             {"vehicleName": "/vhcl1"},
-            {"takeOffHeight": 10.0}
+            {"takeOffHeight": 10.0},
+            {"xyMaxVelocity": 10.0}
         ]
     )
 
@@ -40,7 +41,8 @@ def generate_launch_description():
         name = 'drone2',
         parameters=[
             {"vehicleName": "/vhcl2"},
-            {"takeOffHeight": 12.5}
+            {"takeOffHeight": 12.5},
+            {"xyMaxVelocity": 10.0}
         ]
     )
 
@@ -60,7 +62,8 @@ def generate_launch_description():
         name = 'drone3',
         parameters=[
             {"vehicleName": "/vhcl3"},
-            {"takeOffHeight": 15.0}
+            {"takeOffHeight": 15.0},
+            {"xyMaxVelocity": 10.0}
         ]
     )
 
