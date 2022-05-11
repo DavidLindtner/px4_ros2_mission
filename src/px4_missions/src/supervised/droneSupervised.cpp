@@ -2,9 +2,6 @@
 
 DroneSupervised::DroneSupervised() : DroneMavlink()
 {
-	this->declare_parameter("takeOffHeight", 10.0);
-	takeOffAlt = this->get_parameter("takeOffHeight").as_double();
-
 	_pos_sub = this->create_subscription<geometry_msgs::msg::Pose>(
 									param.vehicleName + "/PositionSetp",
 									1,
@@ -37,13 +34,28 @@ DroneSupervised::DroneSupervised() : DroneMavlink()
 										_timerActive2 = this->create_wall_timer(10000ms, std::bind(&DroneSupervised::timerActiveCallback2, this));
 									});
 
+	_geo_pos_sub = this->create_subscription<geographic_msgs::msg::GeoPoint>(
+									param.vehicleName + "/GeoPositionSetp",
+									1,
+									[this](const geographic_msgs::msg::GeoPoint::ConstSharedPtr msg){
+										_x = msg->latitude;
+										_y = msg->longitude;
+										_z = msg->altitude;
+
+										_absPosPub_Active = true;
+										_timerActive3->cancel();
+										_timerActive3 = this->create_wall_timer(10000ms, std::bind(&DroneSupervised::timerActiveCallback3, this));
+									});
+
 	_timerActive1 = this->create_wall_timer(10000ms, std::bind(&DroneSupervised::timerActiveCallback1, this));
 	_timerActive2 = this->create_wall_timer(10000ms, std::bind(&DroneSupervised::timerActiveCallback2, this));
+	_timerActive3 = this->create_wall_timer(10000ms, std::bind(&DroneSupervised::timerActiveCallback3, this));
 	_timer = this->create_wall_timer(100ms, std::bind(&DroneSupervised::timerCallback, this));
 }
 
 void DroneSupervised::timerActiveCallback1() { _resPosPub_stopped = true; }
 void DroneSupervised::timerActiveCallback2() { _velPub_stopped = true; }
+void DroneSupervised::timerActiveCallback3() { _absPosPub_stopped = true; }
 
 void DroneSupervised::timerCallback()
 {
@@ -100,13 +112,13 @@ void DroneSupervised::timerCallback()
 
 		case 70:
 			// Wait for data
-			if(_velPub_Active || _relPosPub_Active)
+			if(_velPub_Active || _relPosPub_Active || _absPosPub_Active)
 				state = 80;
 			break;
 
 		case 80:
 			// Fly to waypoints
-			if((_velPub_Active  && _velPub_stopped) || (_relPosPub_Active && _resPosPub_stopped))
+			if((_velPub_Active  && _velPub_stopped) || (_relPosPub_Active && _resPosPub_stopped) || (_absPosPub_Active && _absPosPub_stopped))
 				state = 90;
 			break;
 
@@ -212,6 +224,8 @@ void DroneSupervised::timerCallback()
 			this->publish_traj_setp_position(_x, _y, _z, _yaw);
 		if(_velPub_Active)
 			this->publish_traj_setp_speed(_x, _y, _z, _yaw);
+		if(_absPosPub_Active)
+			this->publish_traj_setp_geo(_x, _y, _z, true);
 	}		
 	else if (state >= 90)
 		this->publish_traj_setp_geo(holdLat, holdLon, holdAlt, false);

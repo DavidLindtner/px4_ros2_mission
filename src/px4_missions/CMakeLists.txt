@@ -48,7 +48,7 @@ install(TARGETS simpleMission
 
 # missionSupervisor
 add_executable(missionSupervisor src/missionSupervisor.cpp)
-ament_target_dependencies(missionSupervisor rclcpp geometry_msgs tf2 tf2_ros tf2_geometry_msgs)
+ament_target_dependencies(missionSupervisor rclcpp geometry_msgs tf2 tf2_ros tf2_geometry_msgs geographic_msgs)
 
 target_include_directories(missionSupervisor PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
