@@ -91,6 +91,21 @@ install(TARGETS supervisedMission
 
 
 
+# simpleMission RTPS
+add_executable(simpleMissionRTPS src/simpleMissionRTPS.cpp src/simpleRTPS/droneSimple.cpp src/base/droneBaseRTPS.cpp src/base/droneBaseMavlink.cpp)
+ament_target_dependencies(simpleMissionRTPS rclcpp px4_msgs mavros_msgs geometry_msgs geographic_msgs sensor_msgs tf2 tf2_ros tf2_geometry_msgs)
+
+target_include_directories(simpleMissionRTPS PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>)
+
+install(TARGETS simpleMissionRTPS
+  DESTINATION lib/${PROJECT_NAME})
+
+
+
+
+
 # all packages
 install(DIRECTORY launch
   DESTINATION share/${PROJECT_NAME}

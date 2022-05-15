@@ -1,4 +1,3 @@
-# NOT YET FULLY DEVELOPED
 # Simulation of Unmanned Aircrafts in a Virtual Environment
 
 For downloading all ROS2 packages run command
@@ -9,7 +8,7 @@ vcs import < vcs.repos
 
 In order to install all dependencies for simulation of drone missions with PX4 & ROS2 you need to follow steps in `install.md`
 
-## Run simulation with single wehicle
+## Run simulation with single wehicle using RTPS
 
 In order to simulate ROS 2 mission with PX4 firmware you need to run
 
@@ -31,26 +30,7 @@ micrortps_agent -t UDP
 To run ROS2 mission you need to source ROS 2 workspace and than run ROS 2 node.
 ```bash
 source ~/px4_ros2_missions/install/setup.bash
-ros2 run px4_missions simpleMission
-```
-## Run supervised simulation
-
-```bash
-ros2 launch px4_missions supervised_launch.py
-```
-## Run simulation with multiple wehicles with MAVLink
-
-To start multiple wehicle simulation (multiple instances of PX4 firmware) with gazebo simulator run command in PX4-Autopilot directory:
-```bash
-./Tools/gazebo_sitl_multiple_run.sh -t px4_sitl_default -m iris -n 3
-```
-
-Then run ROS 2 launch file which launchs:
-* 3x mavros
-* 3x simpleMission ROS 2 node
-
-```bash
-ros2 launch px4_missions multipleDrone_launch.py 
+ros2 run px4_missions simpleMissionRTPS
 ```
 
 ## Run simulation with multiple wehicles with RTPS - NOT YET NOT WORKING
@@ -82,10 +62,30 @@ micrortps_agent -t UDP -r 2026 -s 2025 -n vhcl3
 To run ROS2 mission you need to source ROS 2 workspace and than run ROS 2 node.
 ```bash
 source ~/px4_ros2_missions/install/setup.bash
-ros2 run px4_missions multipleMission
+ros2 run px4_missions simpleMissionRTPS
 ```
 
-> **NOTE:**
->
-> This tutorial starts simulation with 4 drones in Gazebo simulator
-> 
+## Run simulation with multiple wehicles with MAVLink
+
+To start multiple wehicle simulation (multiple instances of PX4 firmware) with gazebo simulator run command in PX4-Autopilot directory:
+```bash
+./Tools/gazebo_sitl_multiple_run.sh -t px4_sitl_default -m iris -n 3 -w vut_1000k
+```
+
+Then run ROS 2 launch file which launchs:
+* 3x mavros
+* 3x ROS 2 node for controlling the drone
+* 3x ROS 2 node for publishing data
+
+```bash
+ros2 launch px4_missions multipleDroneGlobPos_launch.py 
+```
+or
+```bash
+ros2 launch px4_missions multipleDroneLocPos_launch.py 
+```
+or
+```bash
+ros2 launch px4_missions multipleDroneSpeed_launch.py 
+```
+

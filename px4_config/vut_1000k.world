@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<sdf version="1.4">
+  <world name="default">
+    <!--<include>
+      <uri>model://ground_plane</uri>
+    </include>-->
+    <include>
+      <uri>model://sun</uri>
+      <pose>0 0 100 0 0 0 </pose>
+    </include>
+    <include>
+      <uri>model://VUT_1000k</uri>
+      <pose>-54.5 -43.1 -13 0 0 0</pose>
+    </include>
+  <scene>
+    <ambient>0.0 0.0 0.0 1.0</ambient>
+    <shadows>0</shadows>
+  </scene>
+
+    <!-- Define the latitude, longitude, and elevation -->
+    <spherical_coordinates>
+      <surface_model>EARTH_WGS84</surface_model>
+      <latitude_deg>49.22812907</latitude_deg>
+      <longitude_deg>16.57222321</longitude_deg>
+      <elevation>283</elevation>
+           
+      <!--<latitude_deg>49.2286242</latitude_deg>
+      <longitude_deg>16.5718097</longitude_deg>
+      <elevation>294</elevation>-->
+      <!-- currently gazebo has a bug: instead of outputing lat, long, altitude in ENU
+      (x = East, y = North and z = Up) as the default configurations, it's outputting (-E)(-N)U,
+      therefore we rotate the default frame 180 so that it would go back to ENU -->
+      <heading_deg>180</heading_deg>
+    </spherical_coordinates>
+
+  </world>
+</sdf>
